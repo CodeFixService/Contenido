@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e17">
+<title>Cerebro</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/app.css">
+<link rel="stylesheet" href="cc.css">
+<link rel="stylesheet" href="../shared/tema.css">
+<script src="../shared/humano.js"></script>
+</head>
+<body class="con-tabs">
+<header class="top"><button type="button" class="emp-chip" id="bEmpresa" aria-label="Cambiar de empresa"><span class="logo" id="logoEmp"></span><span id="nomEmp">Cerebro</span><span class="flecha">▾</span></button><button class="icon-btn" id="bCampana" aria-label="Avisos" style="position:relative"></button></header>
+<main>
+  <section class="view on" id="v-inicio"></section><section class="view" id="v-ideas"></section><section class="view" id="v-calendario"></section>
+  <section class="view" id="v-pedidos"></section><section class="view" id="v-metricas"></section><section class="view" id="v-base"></section><section class="view" id="v-empresa"></section>
+</main>
+<nav class="tabs" id="nav"></nav>
+<div id="toast" role="status"></div>
+<script>window.CFX_BARRA = { orden: ['inicio', 'ideas', '+', 'calendario'] };</script>
+<script src="../shared/config.js"></script>
+<script src="../shared/vendor/supabase.js"></script>
+<script src="../shared/app.js"></script>
+<script src="motor.js"></script>
+<script src="importador.js"></script>
+<script src="cc.js"></script>
+<script src="m-inicio.js"></script>
+<script src="m-ideas.js"></script>
+<script src="m-pedidos.js"></script>
+<script src="m-calendario.js"></script>
+<script src="m-metricas.js"></script>
+<script src="m-base.js"></script>
+<script src="m-empresa.js"></script>
+<script>
+(async function () {
+  App.registrarSW();
+  const c = await App.requerir();
+  CC.cuenta = c;
+  await App.cargarPublica();
+  CC.montarBarra();
+  App.campana(document.getElementById('bCampana'));
+  try { await CC.cargar(); } catch (e) { App.toast(e.message); }
+  // Núcleo (pagos): cuenta nueva que debe su primer pago → pantalla de activación.
+  if (c.rol === 'usuario') { if (!window.CFX_PAGOS) await new Promise((r) => addEventListener('load', r)); CFX_PAGOS.revisar({ rpc: App.rpc, salir: App.salir }); }
+  CC.ir(location.hash.slice(1) || (CC.emp ? 'inicio' : 'empresa'));
+  addEventListener('hashchange', () => { const h = location.hash.slice(1); if (h && h !== CC.vista) CC.ir(h); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - CC.sync > 120000) CC.cargarEmpresa().then(CC.repintar).catch(() => {}); });
+})();
+</script>
+<script src="../shared/iconos.js"></script>
+<script src="../shared/instalar.js"></script>
+<script src="../shared/barra.js"></script>
+<script src="../shared/auto.js"></script>
+<script src="../shared/fotos.js"></script>
+<script src="../shared/voz.js"></script>
+<script src="../shared/respaldo.js"></script>
+<script src="../shared/pagos.js"></script>
+<script src="../shared/verificar.js"></script>
+<script src="../shared/premium.js"></script>
+<script src="../shared/ayuda.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e17">
+<title>Cerebro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="shared/app.css">
+<link rel="stylesheet" href="shared/tema.css">
+<style>
+  main{max-width:440px;padding-top:8vh}.marca{text-align:center;margin-bottom:18px}
+  .marca .logo{width:76px;height:76px;border-radius:22px;margin:0 auto 10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),color-mix(in srgb,var(--brand) 45%,#000));color:#fff}
+  .marca h1{margin:0;font-size:26px;letter-spacing:-.02em}.tabs2{display:flex;gap:8px;margin-bottom:12px}.tabs2 button{flex:1}
+</style>
+<script src="shared/humano.js"></script>
+</head>
+<body>
+<main>
+  <div class="marca"><div class="logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 5 2V4.5A2.5 2.5 0 0 0 9 4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-5 2V4.5A2.5 2.5 0 0 1 15 4z"/></svg></div><h1 id="nombreApp">Cerebro</h1><p class="muted" id="lema" style="margin:4px 0 0">Ideas que no se repiten para tus redes.</p></div>
+  <section class="card" id="vEntrar">
+    <div class="tabs2"><button type="button" id="tE">Entrar</button><button type="button" class="ghost" id="tR">Crear cuenta</button></div>
+    <form id="fEntrar">
+      <label for="eEmail">Correo</label><input id="eEmail" type="email" autocomplete="email" required>
+      <label for="ePass">Contraseña</label><input id="ePass" type="password" autocomplete="current-password" required>
+      <div class="btns"><button type="submit" class="block" id="bEntrar">Entrar</button></div>
+      <p class="err" id="eErr"></p>
+    </form>
+    <p class="muted" style="text-align:center;margin:8px 0 0"><a href="#" id="aOlvide">¿Olvidaste tu contraseña?</a></p>
+  </section>
+  <section class="card hidden" id="vRegistro">
+    <h2>Crea tu cuenta</h2>
+    <form id="fReg">
+      <label for="rNom">Nombre</label><input id="rNom" maxlength="60" autocomplete="name" required>
+      <label for="rEmail">Correo</label><input id="rEmail" type="email" autocomplete="email" required>
+      <label for="rPass">Contraseña (mínimo 6)</label><input id="rPass" type="password" minlength="6" autocomplete="new-password" required>
+      <div class="btns"><button type="submit" class="block" id="bReg">Crear cuenta</button></div>
+      <p class="sub" style="margin-top:8px">Incluye 7 días de plan Pro de prueba.</p><p class="err" id="rErr"></p>
+    </form>
+    <p class="muted" style="text-align:center"><a href="#" id="aYa">Ya tengo cuenta</a></p>
+  </section>
+  <section class="card hidden" id="vOlvide">
+    <h2>Recuperar contraseña</h2><p class="muted">Te enviaremos un correo con un enlace para crear una contraseña nueva.</p>
+    <label for="oEmail">Correo</label><input id="oEmail" type="email" autocomplete="email">
+    <div class="btns"><button class="ghost" id="bVolver" type="button">Volver</button><button id="bOlvide" type="button">Enviar enlace</button></div><p class="err" id="oErr"></p>
+  </section>
+  <section class="card hidden" id="vNueva">
+    <h2>Crea tu contraseña nueva</h2>
+    <label for="nPass">Contraseña nueva (mínimo 6 caracteres)</label><input id="nPass" type="password" autocomplete="new-password">
+    <div class="btns"><button id="bNueva" type="button" class="block">Guardar y entrar</button></div><p class="err" id="nErr"></p>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+<script src="shared/config.js"></script>
+<script src="shared/vendor/supabase.js"></script>
+<script src="shared/app.js"></script>
+<script>
+(async function () {
+  const { $ } = App;
+  App.registrarSW();
+  const volver = new URLSearchParams(location.search).get('volver');
+  const ver = (id) => ['vEntrar', 'vRegistro', 'vOlvide', 'vNueva'].forEach((v) => $(v).classList.toggle('hidden', v !== id));
+  App.cargarPublica().then((p) => { if (p.textos.app_nombre) { $('nombreApp').textContent = p.textos.app_nombre; document.title = p.textos.app_nombre; } if (p.textos.app_lema) $('lema').textContent = p.textos.app_lema; });
+  App.pie();
+  function seguir(c) { if (volver && volver.startsWith('/') && !volver.startsWith('//')) location.replace(volver); else location.replace(App.ROOT + App.destino(c)); }
+  let recuperando = /type=recovery/.test(location.hash);
+  App.sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { recuperando = true; ver('vNueva'); } });
+  if (recuperando) { ver('vNueva'); return; }
+  try { const c = await App.refrescar(); if (c && !recuperando) { seguir(c); return; } } catch (e) { /* sin sesión */ }
+  $('tR').onclick = () => ver('vRegistro');
+  if (new URLSearchParams(location.search).has('registro')) ver('vRegistro'); // link o QR de invitación
+  $('aYa').onclick = (e) => { e.preventDefault(); ver('vEntrar'); };
+  $('fEntrar').onsubmit = async (e) => {
+    e.preventDefault(); const b = $('bEntrar'); $('eErr').textContent = ''; b.disabled = true; b.textContent = 'Entrando…';
+    try { seguir(await App.entrar($('eEmail').value, $('ePass').value)); } catch (err) { $('eErr').textContent = err.message; b.disabled = false; b.textContent = 'Entrar'; }
+  };
+  $('fReg').onsubmit = async (e) => {
+    e.preventDefault(); const b = $('bReg'); $('rErr').textContent = ''; b.disabled = true;
+    try {
+      const r = await App.registrar($('rEmail').value, $('rPass').value, $('rNom').value);
+      if (r.confirmar) { App.toast('Revisa tu correo para confirmar la cuenta'); ver('vEntrar'); b.disabled = false; } else seguir(await App.refrescar());
+    } catch (err) { $('rErr').textContent = err.message; b.disabled = false; }
+  };
+  $('aOlvide').onclick = (e) => { e.preventDefault(); $('oEmail').value = $('eEmail').value; ver('vOlvide'); };
+  $('bVolver').onclick = () => ver('vEntrar');
+  $('bOlvide').onclick = async () => {
+    $('oErr').textContent = '';
+    const { error } = await App.sb.auth.resetPasswordForEmail($('oEmail').value.trim(), { redirectTo: App.ROOT + 'index.html' });
+    if (error) $('oErr').textContent = App.friendly(error); else { App.toast('Revisa tu correo'); ver('vEntrar'); }
+  };
+  $('bNueva').onclick = async () => {
+    $('nErr').textContent = '';
+    const { error } = await App.sb.auth.updateUser({ password: $('nPass').value });
+    if (error) { $('nErr').textContent = App.friendly(error); return; }
+    history.replaceState(null, '', location.pathname); seguir(await App.refrescar());
+  };
+})();
+</script>
+<script src="shared/iconos.js"></script>
+<script src="shared/instalar.js"></script>
+<script src="shared/barra.js"></script>
+<script src="shared/auto.js"></script>
+<script src="shared/fotos.js"></script>
+<script src="shared/voz.js"></script>
+<script src="shared/respaldo.js"></script>
+<script src="shared/pagos.js"></script>
+<script src="shared/verificar.js"></script>
+<script src="shared/premium.js"></script>
+<script src="shared/ayuda.js"></script>
+</body>
+</html>

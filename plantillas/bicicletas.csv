@@ -1,0 +1,464 @@
+tema,categoria,texto
+Transmisión,parte,cadena
+Transmisión,parte,piñón (cassette)
+Transmisión,parte,platos
+Transmisión,parte,desviador trasero
+Transmisión,parte,desviador delantero
+Transmisión,parte,patilla de cambio
+Transmisión,parte,cables y fundas
+Transmisión,parte,mandos de cambio
+Transmisión,parte,roldanas
+Transmisión,sintoma,la cadena salta al pedalear fuerte
+Transmisión,sintoma,los cambios entran lentos o no entran
+Transmisión,sintoma,un 'tic tic' constante al pedalear
+Transmisión,sintoma,la cadena se cae al cambiar de plato
+Transmisión,sintoma,roce en el desviador delantero
+Transmisión,sintoma,un eslabón rígido que da saltitos
+Transmisión,sintoma,ruido seco de cadena sin lubricar
+Transmisión,sintoma,el cambio sube o baja solo
+Transmisión,sintoma,el mando está duro
+Transmisión,sintoma,la cadena se ve negra y pegajosa
+Transmisión,error,usar WD-40 como lubricante de cadena
+Transmisión,error,lubricar sobre la cadena sucia
+Transmisión,error,no limpiar el exceso de lubricante
+Transmisión,error,andar con la cadena cruzada
+Transmisión,error,cambiar solo la cadena con el piñón gastado
+Transmisión,error,ignorar la patilla doblada
+Transmisión,error,cambiar de plato con toda la fuerza en subida
+Transmisión,error,lavar la transmisión con hidrolavadora
+Transmisión,error,no reajustar los cables nuevos
+Transmisión,error,girar los tornillos del desviador al azar
+Transmisión,error,usar lubricante seco con barro y lluvia
+Transmisión,mito,más aceite es mejor
+Transmisión,mito,"si no suena, está bien"
+Transmisión,mito,la cadena dura lo mismo que la bici
+Transmisión,mito,el desviador se arregla apretando un tornillo
+Transmisión,mito,cualquier aceite sirve
+Transmisión,mito,una cadena cara no se gasta
+Transmisión,dato,la cadena se 'estira' por desgaste y se mide con un medidor
+Transmisión,dato,una cadena gastada se come el piñón y los platos
+Transmisión,dato,la patilla está hecha para doblarse y proteger el cuadro
+Transmisión,dato,el barro seco con grasa forma una pasta que lija
+Transmisión,dato,los cables nuevos ceden y hay que reajustarlos
+Transmisión,dato,casi todo cambio desajustado se arregla con la tensión del cable
+Transmisión,dato,el lubricante necesita tiempo para penetrar antes de rodar
+Transmisión,costo,cadena gastada → cambiar piñón y platos
+Transmisión,costo,patilla barata → desviador trasero caro
+Transmisión,costo,limpieza periódica → evitas cambiar la transmisión completa
+Transmisión,costo,cable barato → mando dañado por forzarlo
+Transmisión,idea_video,medir una cadena en cámara: ¿se cambia o no?
+Transmisión,idea_video,sonido de transmisión limpia vs sucia
+Transmisión,idea_video,patilla doblada vista desde atrás
+Transmisión,idea_video,cadena cruzada con zoom al roce
+Transmisión,idea_video,limpieza completa de transmisión en timelapse
+Transmisión,idea_video,WD-40 vs lubricante real
+Transmisión,idea_video,adivina cuántos km tiene esta cadena
+Transmisión,cta,Agenda tu revisión de transmisión
+Transmisión,cta,Comenta qué ruido hace tu bici
+Transmisión,cta,Guarda esto para tu próxima limpieza
+Frenos,parte,pastillas
+Frenos,parte,disco
+Frenos,parte,caliper
+Frenos,parte,manillas
+Frenos,parte,mangueras
+Frenos,parte,líquido de frenos
+Frenos,parte,cables de freno
+Frenos,parte,zapatas (V-brake)
+Frenos,sintoma,chirrido al frenar
+Frenos,sintoma,freno esponjoso
+Frenos,sintoma,la manilla llega al puño
+Frenos,sintoma,el disco roza al girar
+Frenos,sintoma,vibración al frenar
+Frenos,sintoma,frena menos en bajadas largas
+Frenos,sintoma,olor a quemado tras una bajada
+Frenos,sintoma,el freno se queda pegado
+Frenos,sintoma,pierde fuerza con lluvia
+Frenos,sintoma,ruido metálico al frenar
+Frenos,error,tocar el disco con los dedos
+Frenos,error,usar lubricante en spray cerca del disco
+Frenos,error,no asentar las pastillas nuevas
+Frenos,error,apretar la manilla con la rueda fuera
+Frenos,error,esperar a que suene metal con metal
+Frenos,error,usar el líquido de frenos equivocado
+Frenos,error,bajar con el freno apretado todo el rato
+Frenos,error,limpiar el disco con cualquier desengrasante
+Frenos,mito,"si chirría, hay que apretarlo"
+Frenos,mito,frenar con el delantero te hace volar
+Frenos,mito,las pastillas duran para siempre
+Frenos,mito,el freno hidráulico no necesita mantención
+Frenos,mito,cualquier limpiador sirve para el disco
+Frenos,dato,un disco contaminado con aceite pierde mucha fuerza
+Frenos,dato,las pastillas orgánicas y metálicas se comportan distinto
+Frenos,dato,el líquido de frenos se purga periódicamente
+Frenos,dato,el freno delantero hace la mayor parte de la frenada
+Frenos,dato,las pastillas contaminadas casi siempre se cambian
+Frenos,dato,los frenos sobrecalentados pierden eficacia
+Frenos,costo,cambiar pastillas tarde → cambiar también el disco
+Frenos,costo,purga a tiempo → frenada firme y segura
+Frenos,costo,pastillas a tiempo → caliper sin daño
+Frenos,idea_video,sonido de pastilla agotada
+Frenos,idea_video,pastilla nueva vs gastada lado a lado
+Frenos,idea_video,qué pasa si tocas el disco con los dedos
+Frenos,idea_video,cómo se ve una purga de frenos
+Frenos,idea_video,mito: frenar con el delantero
+Frenos,idea_video,prueba de frenada antes y después
+Frenos,cta,Revisa tus pastillas hoy
+Frenos,cta,Agenda tu purga de frenos
+Frenos,cta,Comenta si tu freno chirría
+Seguridad y antirrobo,parte,número de serie del cuadro
+Seguridad y antirrobo,parte,candado en U
+Seguridad y antirrobo,parte,cadena-candado
+Seguridad y antirrobo,parte,candado de cable
+Seguridad y antirrobo,parte,rastreador oculto
+Seguridad y antirrobo,parte,luces
+Seguridad y antirrobo,parte,casco
+Seguridad y antirrobo,parte,reflectantes
+Seguridad y antirrobo,parte,cierres rápidos
+Seguridad y antirrobo,sintoma,ruedas con cierre rápido sin traba
+Seguridad y antirrobo,sintoma,candado puesto solo en la rueda
+Seguridad y antirrobo,sintoma,bici amarrada a un poste bajo
+Seguridad y antirrobo,sintoma,luces sin batería
+Seguridad y antirrobo,sintoma,casco con un golpe previo
+Seguridad y antirrobo,sintoma,cierre rápido mal cerrado
+Seguridad y antirrobo,error,no anotar el número de serie
+Seguridad y antirrobo,error,amarrar solo la rueda
+Seguridad y antirrobo,error,usar un candado de cable delgado
+Seguridad y antirrobo,error,dejar la bici siempre en el mismo lugar
+Seguridad y antirrobo,error,mostrar en redes dónde guardas la bici
+Seguridad y antirrobo,error,no tener fotos de tu bici
+Seguridad y antirrobo,error,cerrar mal el cierre rápido
+Seguridad y antirrobo,error,andar de noche sin luces
+Seguridad y antirrobo,mito,cualquier candado basta
+Seguridad y antirrobo,mito,"si la bici es barata, nadie la roba"
+Seguridad y antirrobo,mito,en trayectos cortos no hace falta casco
+Seguridad y antirrobo,mito,de día no necesitas luces
+Seguridad y antirrobo,dato,el número de serie suele estar bajo el pedalier
+Seguridad y antirrobo,dato,con número de serie y fotos es más fácil acreditar que es tuya
+Seguridad y antirrobo,dato,un casco golpeado puede perder protección aunque no se note
+Seguridad y antirrobo,dato,una luz trasera intermitente se ve más
+Seguridad y antirrobo,dato,dos candados distintos hacen más lento el robo
+Seguridad y antirrobo,costo,candado decente → no perder la bici completa
+Seguridad y antirrobo,costo,luces → evitar un accidente
+Seguridad y antirrobo,idea_video,dónde está el número de serie en distintos modelos
+Seguridad y antirrobo,idea_video,cómo amarrar bien la bici
+Seguridad y antirrobo,idea_video,candado de cable vs candado en U
+Seguridad y antirrobo,idea_video,checklist antes de salir de noche
+Seguridad y antirrobo,idea_video,cierre rápido bien vs mal cerrado
+Seguridad y antirrobo,cta,Anota tu número de serie hoy
+Seguridad y antirrobo,cta,Compártelo con alguien que anda en bici
+Seguridad y antirrobo,cta,Guarda este checklist
+Suspensión,parte,horquilla
+Suspensión,parte,barras
+Suspensión,parte,retenes
+Suspensión,parte,amortiguador trasero
+Suspensión,parte,rebote
+Suspensión,parte,compresión
+Suspensión,parte,presión de aire
+Suspensión,parte,sag
+Suspensión,parte,bloqueo
+Suspensión,sintoma,la horquilla se hunde y no vuelve
+Suspensión,sintoma,aceite en las barras
+Suspensión,sintoma,un 'clac' al comprimir
+Suspensión,sintoma,no usa todo el recorrido
+Suspensión,sintoma,rebota como resorte
+Suspensión,sintoma,golpe seco al final del recorrido
+Suspensión,sintoma,el bloqueo no bloquea
+Suspensión,sintoma,pierde aire
+Suspensión,error,no limpiar las barras al terminar
+Suspensión,error,nunca ajustar el sag
+Suspensión,error,inflar sin bomba de suspensión
+Suspensión,error,lavar los retenes con presión
+Suspensión,error,saltarse la mantención de bajos
+Suspensión,error,bajar con el bloqueo puesto
+Suspensión,mito,más presión es más rápida
+Suspensión,mito,la suspensión no necesita mantención
+Suspensión,mito,"si no tiene fugas, está perfecta"
+Suspensión,mito,ajustar el rebote no cambia nada
+Suspensión,dato,el sag depende del peso de quien pedalea
+Suspensión,dato,los retenes sucios rayan las barras
+Suspensión,dato,la mantención de bajos renueva aceite y limpia
+Suspensión,dato,un rebote mal ajustado te hace perder control
+Suspensión,costo,limpiar las barras → evitas cambiar barras
+Suspensión,costo,mantención de bajos → evitas un service completo
+Suspensión,idea_video,barras sucias vs limpias de cerca
+Suspensión,idea_video,cómo medir el sag con una amarra
+Suspensión,idea_video,rebote rápido vs lento en cámara lenta
+Suspensión,idea_video,aceite en la barra: qué significa
+Suspensión,cta,Agenda mantención de suspensión
+Suspensión,cta,Comenta cuándo fue tu último service
+Suspensión,cta,Guarda esto para ajustar tu sag
+"Ruedas, masas y rodamientos",parte,masa
+"Ruedas, masas y rodamientos",parte,rodamientos
+"Ruedas, masas y rodamientos",parte,rayos
+"Ruedas, masas y rodamientos",parte,llanta
+"Ruedas, masas y rodamientos",parte,eje
+"Ruedas, masas y rodamientos",parte,eje pasante
+"Ruedas, masas y rodamientos",parte,niples
+"Ruedas, masas y rodamientos",parte,rueda libre
+"Ruedas, masas y rodamientos",sintoma,la rueda tiene juego lateral
+"Ruedas, masas y rodamientos",sintoma,la rueda tiene 'ocho'
+"Ruedas, masas y rodamientos",sintoma,un rayo suelto que suena
+"Ruedas, masas y rodamientos",sintoma,la masa cruje
+"Ruedas, masas y rodamientos",sintoma,la rueda libre patina
+"Ruedas, masas y rodamientos",sintoma,ruido al girar libre
+"Ruedas, masas y rodamientos",sintoma,la rueda no gira suelta
+"Ruedas, masas y rodamientos",sintoma,la llanta roza la zapata
+"Ruedas, masas y rodamientos",error,no revisar los rayos
+"Ruedas, masas y rodamientos",error,dejar el juego en la masa
+"Ruedas, masas y rodamientos",error,lavar los rodamientos a presión
+"Ruedas, masas y rodamientos",error,apretar el eje de más
+"Ruedas, masas y rodamientos",error,ignorar un rayo cortado
+"Ruedas, masas y rodamientos",mito,el ocho se arregla solo
+"Ruedas, masas y rodamientos",mito,"mientras gire, la masa está bien"
+"Ruedas, masas y rodamientos",mito,más tensión en los rayos siempre es mejor
+"Ruedas, masas y rodamientos",dato,el centrado se ajusta con la tensión de los rayos
+"Ruedas, masas y rodamientos",dato,un rodamiento con juego desgasta la masa
+"Ruedas, masas y rodamientos",dato,la rueda libre se puede limpiar y engrasar
+"Ruedas, masas y rodamientos",dato,las llantas con freno de zapata traen indicador de desgaste
+"Ruedas, masas y rodamientos",costo,rodamientos a tiempo → no cambiar la masa
+"Ruedas, masas y rodamientos",costo,rayo a tiempo → no cambiar la llanta
+"Ruedas, masas y rodamientos",idea_video,sonido de un rodamiento gastado
+"Ruedas, masas y rodamientos",idea_video,centrado de rueda en timelapse
+"Ruedas, masas y rodamientos",idea_video,si tu masa se ve así…
+"Ruedas, masas y rodamientos",idea_video,prueba del juego lateral en 5 segundos
+"Ruedas, masas y rodamientos",cta,Mueve tu rueda de lado: ¿tiene juego?
+"Ruedas, masas y rodamientos",cta,Agenda el centrado de tus ruedas
+Neumáticos y pinchazos,parte,cubierta
+Neumáticos y pinchazos,parte,cámara
+Neumáticos y pinchazos,parte,válvula Presta
+Neumáticos y pinchazos,parte,válvula Schrader
+Neumáticos y pinchazos,parte,tubeless
+Neumáticos y pinchazos,parte,sellante
+Neumáticos y pinchazos,parte,cinta de llanta
+Neumáticos y pinchazos,parte,parches
+Neumáticos y pinchazos,parte,bombín
+Neumáticos y pinchazos,sintoma,pinchazos repetidos
+Neumáticos y pinchazos,sintoma,cortes en la cubierta
+Neumáticos y pinchazos,sintoma,banda de rodado lisa
+Neumáticos y pinchazos,sintoma,pierde aire en días
+Neumáticos y pinchazos,sintoma,doble pinchazo tipo mordida
+Neumáticos y pinchazos,sintoma,grietas por sol
+Neumáticos y pinchazos,sintoma,la rueda salta por mal montaje
+Neumáticos y pinchazos,error,andar con poca presión
+Neumáticos y pinchazos,error,inflar sin manómetro
+Neumáticos y pinchazos,error,no revisar la cubierta tras pinchar
+Neumáticos y pinchazos,error,dejar la cinta de llanta corrida
+Neumáticos y pinchazos,error,olvidar el sellante seco en tubeless
+Neumáticos y pinchazos,error,montar la cubierta al revés
+Neumáticos y pinchazos,mito,más presión siempre es más rápido
+Neumáticos y pinchazos,mito,el tubeless nunca se pincha
+Neumáticos y pinchazos,mito,la presión máxima de la cubierta es la ideal
+Neumáticos y pinchazos,dato,la presión ideal depende del peso y el terreno
+Neumáticos y pinchazos,dato,el sellante se seca con los meses
+Neumáticos y pinchazos,dato,la presión impresa en la cubierta es un rango
+Neumáticos y pinchazos,dato,las cubiertas tienen sentido de giro
+Neumáticos y pinchazos,costo,parche a tiempo → no cambiar la cámara
+Neumáticos y pinchazos,costo,cubierta nueva → menos pinchazos en ruta
+Neumáticos y pinchazos,idea_video,la espina escondida dentro de la cubierta
+Neumáticos y pinchazos,idea_video,mordida de serpiente explicada
+Neumáticos y pinchazos,idea_video,sellante seco al abrir un tubeless
+Neumáticos y pinchazos,idea_video,qué presión usar según tu peso
+Neumáticos y pinchazos,cta,Revisa tu presión antes de salir
+Neumáticos y pinchazos,cta,Guarda esta guía de presión
+Componentes,parte,biela
+Componentes,parte,pedalier
+Componentes,parte,juego de dirección
+Componentes,parte,manubrio
+Componentes,parte,potencia
+Componentes,parte,sillín
+Componentes,parte,tija
+Componentes,parte,pedales
+Componentes,parte,puños
+Componentes,sintoma,la biela izquierda se suelta
+Componentes,sintoma,crujido al pedalear de pie
+Componentes,sintoma,golpecito en el manubrio al frenar
+Componentes,sintoma,el manubrio gira solo
+Componentes,sintoma,la tija baja sola
+Componentes,sintoma,el pedal tiene juego
+Componentes,sintoma,el sillín cruje
+Componentes,error,apretar sin torquímetro
+Componentes,error,montar carbono sin pasta
+Componentes,error,no engrasar las roscas
+Componentes,error,ignorar el juego de dirección
+Componentes,error,ajustar en el orden equivocado
+Componentes,mito,más apretado es más seguro
+Componentes,mito,el crujido siempre viene de la cadena
+Componentes,mito,el carbono no necesita cuidado especial
+Componentes,dato,"muchos crujidos vienen del pedalier, pedales o tija"
+Componentes,dato,el torque correcto viene marcado en la pieza
+Componentes,dato,el juego de dirección se revisa frenando y meciendo
+Componentes,dato,el carbono se daña por sobreapriete
+Componentes,costo,tornillo flojo → biela dañada
+Componentes,costo,dirección suelta → cazoletas dañadas
+Componentes,idea_video,biela que se cae: por qué pasa
+Componentes,idea_video,encontrar un crujido paso a paso
+Componentes,idea_video,prueba del juego de dirección
+Componentes,idea_video,torquímetro: apretar bien vs mal
+Componentes,cta,Haz la prueba del manubrio hoy
+Componentes,cta,Comenta qué le cruje a tu bici
+Ajuste y posición,parte,altura del sillín
+Ajuste y posición,parte,retroceso del sillín
+Ajuste y posición,parte,inclinación del sillín
+Ajuste y posición,parte,alcance
+Ajuste y posición,parte,altura del manubrio
+Ajuste y posición,parte,ancho del manubrio
+Ajuste y posición,parte,calas
+Ajuste y posición,parte,inclinación de manillas
+Ajuste y posición,sintoma,dolor de rodilla
+Ajuste y posición,sintoma,dolor de espalda baja
+Ajuste y posición,sintoma,manos dormidas
+Ajuste y posición,sintoma,dolor de cuello
+Ajuste y posición,sintoma,caderas que se balancean
+Ajuste y posición,sintoma,molestia en el sillín
+Ajuste y posición,error,sillín muy bajo
+Ajuste y posición,error,sillín muy alto
+Ajuste y posición,error,copiar la posición de otro
+Ajuste y posición,error,manillas mal inclinadas
+Ajuste y posición,error,comprar la talla por precio
+Ajuste y posición,error,no reajustar al cambiar zapatillas
+Ajuste y posición,mito,el sillín más blando es más cómodo
+Ajuste y posición,mito,la talla da lo mismo
+Ajuste y posición,mito,el dolor es normal al andar
+Ajuste y posición,dato,un sillín bajo carga más la rodilla
+Ajuste y posición,dato,un ajuste pequeño cambia mucho
+Ajuste y posición,dato,cada cuerpo necesita un ajuste distinto
+Ajuste y posición,costo,ajuste a tiempo → menos molestias y más kilómetros
+Ajuste y posición,idea_video,antes y después de subir el sillín
+Ajuste y posición,idea_video,la prueba del talón
+Ajuste y posición,idea_video,manillas bien inclinadas
+Ajuste y posición,idea_video,3 señales de que tu bici no es tu talla
+Ajuste y posición,cta,Mide tu sillín hoy
+Ajuste y posición,cta,Comenta dónde te duele al pedalear
+Mantención preventiva y temporada,parte,lavado
+Mantención preventiva y temporada,parte,lubricación
+Mantención preventiva y temporada,parte,revisión de pernos
+Mantención preventiva y temporada,parte,presión
+Mantención preventiva y temporada,parte,frenos
+Mantención preventiva y temporada,parte,cables
+Mantención preventiva y temporada,parte,guardado
+Mantención preventiva y temporada,sintoma,bici guardada todo el invierno
+Mantención preventiva y temporada,sintoma,óxido en la cadena
+Mantención preventiva y temporada,sintoma,bici después de la lluvia
+Mantención preventiva y temporada,sintoma,bici después del barro
+Mantención preventiva y temporada,sintoma,antes de una ruta larga
+Mantención preventiva y temporada,sintoma,bici nueva tras los primeros km
+Mantención preventiva y temporada,error,guardar la bici mojada
+Mantención preventiva y temporada,error,lavar con hidrolavadora
+Mantención preventiva y temporada,error,saltarse la primera revisión de la bici nueva
+Mantención preventiva y temporada,error,esperar a que falle
+Mantención preventiva y temporada,error,guardarla con poco aire
+Mantención preventiva y temporada,error,dejarla al sol
+Mantención preventiva y temporada,mito,la bici nueva no necesita revisión
+Mantención preventiva y temporada,mito,solo se mantiene si se usa mucho
+Mantención preventiva y temporada,mito,lavar la bici es solo estético
+Mantención preventiva y temporada,dato,los cables de una bici nueva ceden
+Mantención preventiva y temporada,dato,la humedad oxida en días
+Mantención preventiva y temporada,dato,"un chequeo de 1 minuto: aire, frenos y cadena"
+Mantención preventiva y temporada,costo,mantención preventiva → evitas la reparación grande
+Mantención preventiva y temporada,idea_video,checklist de 1 minuto antes de salir
+Mantención preventiva y temporada,idea_video,qué hacer después de rodar con lluvia
+Mantención preventiva y temporada,idea_video,así quedó una bici tras el invierno
+Mantención preventiva y temporada,idea_video,calendario de mantención del año
+Mantención preventiva y temporada,cta,Agenda tu mantención de temporada
+Mantención preventiva y temporada,cta,Guarda el checklist
+Productos y herramientas,parte,lubricante seco
+Productos y herramientas,parte,lubricante húmedo
+Productos y herramientas,parte,cera
+Productos y herramientas,parte,desengrasante
+Productos y herramientas,parte,grasa
+Productos y herramientas,parte,pasta de carbono
+Productos y herramientas,parte,torquímetro
+Productos y herramientas,parte,medidor de cadena
+Productos y herramientas,parte,bomba de piso
+Productos y herramientas,parte,multiherramienta
+Productos y herramientas,parte,limpiador de disco
+Productos y herramientas,error,usar WD-40 como lubricante
+Productos y herramientas,error,usar aceite de cocina o de motor
+Productos y herramientas,error,poner desengrasante en rodamientos
+Productos y herramientas,error,dejar grasa cerca del disco
+Productos y herramientas,error,comprar herramientas que no sirven
+Productos y herramientas,mito,el lubricante caro siempre es mejor
+Productos y herramientas,mito,un producto sirve para todo
+Productos y herramientas,dato,"lubricante seco para clima seco, húmedo para lluvia"
+Productos y herramientas,dato,la cera ensucia menos
+Productos y herramientas,dato,el alcohol isopropílico limpia el disco sin dañarlo
+Productos y herramientas,idea_video,kit básico para tener en casa
+Productos y herramientas,idea_video,lo que NUNCA debes echarle a tu bici
+Productos y herramientas,idea_video,lubricante seco vs húmedo
+Productos y herramientas,idea_video,las 5 herramientas mínimas
+Productos y herramientas,cta,Comenta qué lubricante usas
+Productos y herramientas,cta,Guarda esta lista
+Antes y después,parte,bici abandonada
+Antes y después,parte,transmisión
+Antes y después,parte,limpieza total
+Antes y después,parte,restauración
+Antes y después,parte,mantención full
+Antes y después,parte,bici heredada
+Antes y después,idea_video,así llegó / así se fue
+Antes y después,idea_video,adivina cuánto tiempo estuvo sin mantención
+Antes y después,idea_video,¿tiene arreglo o no?
+Antes y después,idea_video,timelapse de la recuperación
+Antes y después,idea_video,reacción del cliente al retirarla
+Antes y después,idea_video,detalle sucio vs limpio en pantalla dividida
+Antes y después,cta,¿La tuya es la próxima? Agenda por DM
+Antes y después,cta,Etiqueta a quien necesita esto
+Costos y ahorro,dato,la pieza barata que evita el daño caro
+Costos y ahorro,dato,cuándo conviene reparar y cuándo cambiar
+Costos y ahorro,dato,lo que ahorras al mes yendo en bici
+Costos y ahorro,dato,mantención vs reparación: la diferencia de precio
+Costos y ahorro,idea_video,presupuesto rechazado: qué pasó después
+Costos y ahorro,idea_video,cuánto te cuesta ignorar un ruido
+Costos y ahorro,idea_video,reparar vs cambiar: el veredicto
+Costos y ahorro,idea_video,cuánto ahorras con una mantención al año
+Costos y ahorro,cta,Pide tu presupuesto por DM
+Costos y ahorro,cta,Comenta cuánto pagaste la última vez
+Confianza,idea_video,un día en el taller
+Confianza,idea_video,conoce a los mecánicos
+Confianza,idea_video,cómo entregamos una bici
+Confianza,idea_video,cliente que vuelve: por qué
+Confianza,idea_video,detrás de cámaras de una mantención full
+Confianza,cta,Agenda y conoce el taller
+Confianza,cta,Déjanos tu reseña
+Venta y servicios,idea_video,qué incluye la mantención full
+Venta y servicios,idea_video,quedan pocos cupos esta semana
+Venta y servicios,idea_video,producto de la semana
+Venta y servicios,idea_video,"antes de tu próxima ruta, pasa por aquí"
+Venta y servicios,cta,Agenda en el link de la bio
+Venta y servicios,cta,Escríbenos por DM
+Venta y servicios,cta,Compra en cicloservice.cl
+General,cta,Guárdalo para después
+General,cta,Compártelo con tu compañero de ruta
+General,cta,Comenta 'SÍ' si te pasó
+General,cta,Agenda por DM
+General,cta,Link en la bio
+General,cta,Síguenos para la parte 2
+General,cta,Etiqueta a quien necesita ver esto
+General,cta,Responde la encuesta en historias
+General,cta,¿Quieres que revisemos la tuya?
+General,cta,Escríbenos tu duda abajo
+General,toma,primer plano de la pieza con problema
+General,toma,plano detalle del sonido (micrófono cerca)
+General,toma,manos del mecánico trabajando
+General,toma,pantalla dividida antes/después
+General,toma,cámara lenta del movimiento
+General,toma,bici completa girando en el soporte
+General,toma,toma POV del ciclista
+General,toma,timelapse del proceso completo
+General,toma,mecánico mirando a cámara explicando
+General,toma,zoom al detalle que nadie ve
+General,estructura_gancho,Error que cuesta: El error de {error} te sale caro | {Error}: el error que más plata cuesta
+General,estructura_gancho,Síntoma: {Sintoma}: no lo ignores | Síntoma: {sintoma}. ¿Sabes qué es?
+General,estructura_gancho,Pregunta directa: ¿Culpable? {Error} 🙋 | ¿Tú también? {Error}
+General,estructura_gancho,Dato revelador: Nadie te dice que {dato} | Dato que pocos saben: {dato}
+General,estructura_gancho,Situación: Llegó diciendo: «{sintoma}». Mira lo que era | El cliente: «{sintoma}». Nosotros: 👀
+General,estructura_gancho,Así llegó: {Parte}: así llegó 😬 | Mira cómo llegó: {parte} 😬
+General,estructura_gancho,Mito vs. realidad: «{Mito}». Falso. | Mito: {mito}. La verdad 👇
+General,estructura_gancho,Reto: Reto 🔎 Pista: {parte}. ¿Qué tiene? | ¿Qué falla aquí? Pista: {parte}
+General,estructura_gancho,Costo: Lo barato que sale caro: {costo} | {Costo}. Haz la cuenta
+General,estructura_gancho,Detrás de cámaras: Así lo hacemos: {idea_video} | Detrás de cámaras: {idea_video}
+Confianza,idea_video,cómo revisamos una bici punto por punto
+Confianza,idea_video,"la entrega en 2 horas, de principio a fin"
+Confianza,idea_video,las herramientas profesionales que usamos y por qué
+Venta y servicios,idea_video,qué incluye cada mantención por componente
+Venta y servicios,idea_video,cómo agendar en 30 segundos
+Venta y servicios,idea_video,envío gratis en Santiago sobre $50.000: cómo funciona
