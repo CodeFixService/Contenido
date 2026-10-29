@@ -71,3 +71,14 @@ select titulo from public.notificaciones order by created_at;
 insert into extensions.http_respuestas (url_like, content) values ('%version.json%', '{"version":"1.0","bd":"1.0"}');
 select public.auto_actualizar() as auto;
 select jobname, schedule from cron.job order by jobname;
+-- Ciclo mensual (v1.1)
+set role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
+select public.metricas_importar((select id from public.empresas where nombre = 'Ciclo Service'), 'instagram', 'cuenta',
+  '[{"fecha":"2026-09-10","metrica":"visualizaciones","valor":100},{"fecha":"2026-09-11","metrica":"visualizaciones","valor":50},{"fecha":"2026-09-30","metrica":"vistas_30d","valor":900},{"fecha":"2026-09-20","metrica":"vistas_30d","valor":700}]');
+select public.cerrar_mes((select id from public.empresas where nombre = 'Ciclo Service'), '2026-09-15');
+select metrica, valor from public.resumen_mes order by metrica;
+do $$ begin perform public.cerrar_mes((select id from public.empresas where nombre = 'Ciclo Service'), current_date); raise exception 'FALLO: cerró el mes en curso';
+exception when others then if sqlerrm like 'FALLO%' then raise; end if; raise notice 'ok mes en curso: %', sqlerrm; end $$;
+select jsonb_array_length(public.mi_uso() -> 'tablas') as tablas_uso;
+reset role;

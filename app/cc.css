@@ -76,4 +76,34 @@ textarea.prompt { min-height: 160px; font-size: 12.5px; font-family: ui-monospac
 .equipo-fila button { min-height: 0; height: 44px; padding: 0; }
 .ritmo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .ritmo label { margin: 0; font-size: 12px; }
-@media (min-width: 720px) { .idea .botones { grid-template-columns: repeat(4, minmax(0, 140px)); } .grid-num { grid-template-columns: repeat(4, 1fr); } }
+/* Listas: el contenido usa todo el ancho y el botón queda a la derecha */
+.list li > .fila, .list li > .grow, .list li > .cont { flex: 1; min-width: 0; }
+.list li .cont > * + * { margin-top: 4px; }
+.list li .btns { margin-top: 8px; }
+/* Botones: ícono y texto siempre centrados, nada pegado */
+main button:not(.icon-btn):not(.opc), main .btn, dialog .card button:not(.opc) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.btns { gap: 8px; }
+.idea .botones button, .btns button { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.idea .botones button svg, .btns button svg { flex: none; }
+.opc { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.opc small { display: block; }
+.opc.op-fila { flex-direction: row; align-items: center; gap: 10px; width: 100%; text-align: left; margin: 6px 0; min-height: 48px; }
+.opc.op-fila svg { flex: none; }
+/* Lista de publicaciones (en vez de tabla: se lee bien en cualquier ancho) */
+.pubs li { display: block; }
+.pubs .txt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 4px 0; }
+.pubs .nums { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+.pubs .nums b { color: var(--text); }
+.titulo .small { min-height: 38px; }
+.fila.nav-sem b { font-size: 15px; }
+/* Tablet: dos columnas de números */
+@media (min-width: 600px) { .grid-num { grid-template-columns: repeat(3, 1fr); } }
+/* Computador: tarjetas en dos columnas, sin espacio vacío */
+@media (min-width: 900px) {
+  .grid-ideas, .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .grid-ideas > .idea, .grid-2 > .card, .grid-2 > details { margin: 0; }
+  .grid-num { grid-template-columns: repeat(4, 1fr); }
+  .titulo h2 { font-size: 24px; }
+  dialog .card { max-width: 520px; }
+}
+@media (max-width: 370px) { .idea .campo .et { width: 62px; font-size: 10.5px; } .idea .botones button { font-size: 12.5px; } }

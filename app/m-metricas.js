@@ -22,7 +22,7 @@
       '<div class="card"><h3>Importar</h3><div class="soltar" id="mSoltar"><b>Arrastra o elige archivos</b><p class="sub">CSV de Meta Business Suite o TikTok Studio, o capturas de pantalla de las estadísticas.</p>' +
       '<div class="fila" style="justify-content:center"><label class="btn small" style="margin:0">📄 Archivos<input type="file" id="mArch" multiple accept=".csv,.txt,text/csv" hidden></label>' +
       '<label class="btn small alt" style="margin:0">📷 Capturas<input type="file" id="mCap" multiple accept="image/*" hidden></label><button type="button" class="small ghost" id="mPeg">📋 Pegar texto</button></div></div>' +
-      '<div id="mCola"></div></div>' + resumen() + topPublicaciones() + ranking() + audiencia();
+      '<div id="mCola"></div></div>' + resumen() + '<div class="grid-2">' + topPublicaciones() + ranking() + audiencia() + ciclo() + '</div>';
     const s = el.querySelector('#mSoltar');
     s.ondragover = (e) => { e.preventDefault(); s.classList.add('encima'); };
     s.ondragleave = () => s.classList.remove('encima');
@@ -32,6 +32,7 @@
     el.querySelector('#mPeg').onclick = pegar;
     el.querySelectorAll('[data-dias]').forEach((b) => { b.onclick = () => { dias = +b.dataset.dias; pintar(el); }; });
     el.querySelectorAll('[data-anotar]').forEach((b) => { b.onclick = () => { const p = CC.pubs.find((x) => x.id === b.dataset.anotar); if (p) CC.anotarMetricas(p); }; });
+    el.querySelectorAll('[data-cerrar-mes]').forEach((b) => { b.onclick = () => cerrarMes(b.dataset.cerrarMes); });
     pintarCola();
   }
 
@@ -172,22 +173,27 @@
     const cab = '<div class="chips">' + [7, 28, 90].map((d) => '<button type="button" data-dias="' + d + '" class="' + (d === dias ? 'on' : '') + '">' + d + ' días</button>').join('') + '</div>';
     if (!redes.length) return '<div class="card"><h3>Tu cuenta</h3><p class="empty">Importa los archivos de Meta Business Suite o TikTok Studio para ver aquí cómo va cada red.</p></div>';
     return '<div class="card"><h3>Tu cuenta</h3>' + cab + redes.map((r) => {
-      const suma = (a, b) => { const o = {}; CC.mcuenta.filter((m) => m.red === r && m.fecha >= a && m.fecha <= b && !/_\d+d$/.test(m.metrica)).forEach((m) => { o[m.metrica] = (o[m.metrica] || 0) + Number(m.valor); }); return o; };
+      const vistos = {};
+      const suma = (a, b) => { const o = {}; CC.mcuenta.filter((m) => m.red === r && m.fecha >= a && m.fecha <= b && !/_\d+d$/.test(m.metrica)).forEach((m) => { o[m.metrica] = (o[m.metrica] || 0) + Number(m.valor); (vistos[a] = vistos[a] || {})[m.metrica + m.fecha] = 1; }); return o; };
       const ahora = suma(desde, hasta), prev = suma(antes, App.sumarDias(desde, -1));
+      // Solo se compara si el período anterior tiene datos de casi todos sus días (si no, el % engaña).
+      const cubierto = (k) => Object.keys(vistos[antes] || {}).filter((x) => x.startsWith(k + '2')).length >= Math.ceil(dias * 0.8);
       const ks = Object.keys(ahora).sort((a, b) => (a === 'visualizaciones' ? -1 : b === 'visualizaciones' ? 1 : 0));
       return '<h3 style="margin-top:12px">' + CC.red(r) + '</h3><div class="grid-num">' + ks.map((k) => {
-        const p = prev[k], v = ahora[k], d = p ? Math.round(((v - p) / p) * 100) : null;
+        const p = prev[k], v = ahora[k], d = p && cubierto(k) ? Math.round(((v - p) / p) * 100) : null;
         return '<div class="kpi"><b>' + CC.fmt(v) + '</b><span>' + esc(nom(k)) + (d != null ? ' · <span style="color:var(--' + (d >= 0 ? 'ok' : 'bad') + ')">' + (d >= 0 ? '▲' : '▼') + Math.abs(d) + '%</span>' : '') + '</span></div>';
       }).join('') + '</div>' + CC.tip(r, ks.includes('espectadores_nuevos') ? 'espectadores_nuevos' : 'vistas');
-    }).join('') + '<p class="sub">Comparado con los ' + dias + ' días anteriores.</p></div>';
+    }).join('') + '<p class="sub">Los % comparan con los ' + dias + ' días anteriores (solo si están importados completos).</p></div>';
   }
   function topPublicaciones() {
     const ult = {};
     CC.metricas.forEach((m) => { if (!ult[m.publicacion_id] || m.fecha_corte > ult[m.publicacion_id].fecha_corte) ult[m.publicacion_id] = m; });
     const L = CC.pubs.filter((p) => ult[p.id]).sort((a, b) => (ult[b.id].vistas || 0) - (ult[a.id].vistas || 0)).slice(0, 10);
     const sinMedir = CC.pubs.filter((p) => !ult[p.id]).slice(0, 5);
-    return '<div class="card"><h3>Publicaciones que más rinden</h3>' + (L.length ? '<div class="scroll-x"><table class="tabla"><thead><tr><th>Publicación</th><th>Vistas</th><th>Compart.</th><th>Guard.</th><th>🎯</th></tr></thead><tbody>' +
-      L.map((p) => { const m = ult[p.id]; return '<tr><td>' + CC.red(p.red) + ' ' + esc((p.texto || '').slice(0, 60)) + '</td><td>' + CC.fmt(m.vistas) + '</td><td>' + CC.fmt(m.compartidos) + '</td><td>' + CC.fmt(m.guardados) + '</td><td><button class="small ghost" data-anotar="' + p.id + '">' + (m.clientes_generados || '＋') + '</button></td></tr>'; }).join('') + '</tbody></table></div>'
+    const n = (v) => v == null ? '—' : CC.fmt(v);
+    return '<div class="card"><h3>Publicaciones que más rinden</h3>' + (L.length ? '<ul class="list pubs">' + L.map((p) => { const m = ult[p.id];
+      return '<li><div class="fila">' + CC.red(p.red) + '<span class="sub grow">' + App.fCorta(String(p.fecha_hora).slice(0, 10)) + '</span><button class="small ghost" data-anotar="' + p.id + '">' + (m.clientes_generados ? '🎯 ' + m.clientes_generados : 'Anotar') + '</button></div>' +
+        '<div class="txt">' + esc(p.texto || '(importada)') + '</div><div class="nums"><span><b>' + n(m.vistas) + '</b> vistas</span><span><b>' + n(m.compartidos) + '</b> compartidos</span><span><b>' + n(m.guardados) + '</b> guardados</span></div></li>'; }).join('') + '</ul>'
       : '<p class="empty">Aún no hay métricas por publicación.</p>') +
       (sinMedir.length ? '<b class="sub">Publicadas sin medir</b><ul class="list">' + sinMedir.map((p) => '<li><div class="fila"><span class="grow">' + CC.red(p.red) + ' ' + esc((p.texto || '').slice(0, 60)) + '</span><button class="small" data-anotar="' + p.id + '">Anotar</button></div></li>').join('') + '</ul>' : '') +
       CC.tip('todas', 'clientes_generados') + '</div>';
@@ -205,6 +211,38 @@
     const de = (dim) => CC.audiencia.filter((a) => a.fecha_corte === ult && a.dimension === dim).sort((a, b) => b.porcentaje - a.porcentaje).slice(0, 5);
     const bloque = (t, L, pct) => L.length ? '<b class="sub">' + t + '</b><ul class="list">' + L.map((a) => '<li><div class="fila"><span class="grow">' + esc(a.valor) + ' <span class="sub">' + CC.nomRed(a.red) + '</span></span><b>' + (pct ? String(a.porcentaje).replace('.', ',') + '%' : CC.fmt(a.porcentaje)) + '</b></div></li>').join('') + '</ul>' : '';
     return '<div class="card"><h3>Tu público</h3>' + bloque('Edad y sexo', de('edad_sexo'), true) + bloque('Ciudades', de('ciudad'), true) + bloque('Países', de('pais'), true) + bloque('Horas de más actividad', de('hora'), true) + bloque('Formatos', de('formato')) + '</div>';
+  }
+
+  /* ---------- ciclo mensual: descargar, resumir y liberar espacio ---------- */
+  const MES = (m) => { const t = new Date(m + '-15T12:00:00').toLocaleDateString('es-CL', { month: 'long', year: 'numeric' }); return t[0].toUpperCase() + t.slice(1); };
+  function ciclo() {
+    const actual = App.hoy().slice(0, 7);
+    const abiertos = Array.from(new Set(CC.mcuenta.map((m) => m.fecha.slice(0, 7)))).filter((m) => m < actual).sort();
+    const cerrados = Array.from(new Set(CC.meses.map((m) => String(m.mes).slice(0, 7)))).sort().reverse().slice(0, 12);
+    const val = (mes, red, k) => { const x = CC.meses.find((m) => String(m.mes).slice(0, 7) === mes && m.red === red && m.metrica === k); return x ? Number(x.valor) : null; };
+    return '<div class="card"><h3>🗂️ Ciclo mensual</h3><p class="sub" style="margin-top:0">Cada mes terminado: descargas su Excel, queda un resumen para comparar y se borra lo diario para no llenar el servidor. Tus ideas no se borran: así ningún gancho se repite.</p>' +
+      (abiertos.length ? '<ul class="list">' + abiertos.map((m) => '<li><div class="fila"><span class="grow"><b>' + MES(m) + '</b><span class="sub"> · ' + CC.mcuenta.filter((x) => x.fecha.startsWith(m)).length + ' filas diarias</span></span><button class="small" data-cerrar-mes="' + m + '">⬇️ Cerrar mes</button></div></li>').join('') + '</ul>'
+        : '<p class="empty" style="padding:8px 0">No hay meses por cerrar.</p>') +
+      (cerrados.length ? '<b class="sub">Meses cerrados</b><div class="scroll-x"><table class="tabla"><thead><tr><th>Mes</th><th>Visualiz.</th><th>Seguid.</th><th>Publicadas</th><th>🎯</th></tr></thead><tbody>' +
+        cerrados.map((m) => { const s = (k) => ['tiktok', 'instagram', 'facebook'].reduce((a, r) => a + (val(m, r, k) || 0), 0); return '<tr><td>' + MES(m) + '</td><td>' + CC.fmt(s('visualizaciones')) + '</td><td>' + CC.fmt(s('seguidores_nuevos')) + '</td><td>' + CC.fmt(s('pub_publicadas')) + '</td><td>' + CC.fmt(s('pub_clientes')) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') + '</div>';
+  }
+  async function cerrarMes(m) {
+    if (!(await App.confirmar('Cerrar ' + MES(m) + ':\n1) Se descarga el Excel del mes.\n2) Queda el resumen para comparar.\n3) Se borran las filas diarias de ese mes.\n\nLas ideas y publicaciones se conservan.', 'Descargar y cerrar'))) return;
+    try {
+      const pubs = CC.pubs.filter((p) => String(p.fecha_hora).slice(0, 7) === m);
+      const met = {}; CC.metricas.forEach((x) => { if (!met[x.publicacion_id] || x.fecha_corte > met[x.publicacion_id].fecha_corte) met[x.publicacion_id] = x; });
+      const hojas = {
+        Diario: CC.mcuenta.filter((x) => x.fecha.startsWith(m)).map((x) => ({ red: x.red, fecha: x.fecha, metrica: x.metrica, valor: Number(x.valor) })),
+        Publicaciones: pubs.map((p) => { const x = met[p.id] || {}; return { red: p.red, fecha: String(p.fecha_hora).slice(0, 16).replace('T', ' '), texto: p.texto, link: p.link, vistas: x.vistas, compartidos: x.compartidos, guardados: x.guardados, me_gusta: x.me_gusta, comentarios: x.comentarios, clientes: x.clientes_generados }; }),
+        Ideas: CC.ideas.filter((i) => (i.fecha_plan || '').startsWith(m)).map((i) => ({ fecha: i.fecha_plan, red: i.red, tema: i.tema, gancho: i.gancho, formato: i.formato, estado: i.estado })),
+        Audiencia: CC.audiencia.map((a) => ({ red: a.red, fecha: a.fecha_corte, dimension: a.dimension, valor: a.valor, porcentaje: Number(a.porcentaje) }))
+      };
+      if (window.CFX_RESPALDO) CFX_RESPALDO.excel('cerebro-' + Importador.norm(CC.emp.nombre).replace(/ /g, '-') + '-' + m, hojas);
+      const r = await App.rpc('cerrar_mes', { p_empresa: CC.emp.id, p_mes: m + '-01' });
+      await CC.cargarEmpresa();
+      App.toast('✅ ' + MES(m) + ' cerrado · ' + r.diarias_borradas + ' filas liberadas');
+      pintar(raiz);
+    } catch (e) { App.toast(e.message); }
   }
 
   CC.vistas.metricas = { pintar };

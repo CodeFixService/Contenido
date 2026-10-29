@@ -30,10 +30,10 @@
       }).join('') + '</div>' +
       '<p class="sub leyenda" style="margin:8px 0 0">' + [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['historias', 'Historias'], ['ok', 'Publicada']].map(([k, t]) => '<span><span class="pt ' + k + '"></span>' + t + '</span>').join('') + '</p>' +
       '<div class="card" style="margin-top:12px"><h3>' + esc(App.fLarga(dia).replace(/^./, (c) => c.toUpperCase())) + '</h3>' +
-      (d.ideas.length || d.sueltas.length ? '<ul class="list" id="cDia">' + d.ideas.map((i) => '<li data-id="' + i.id + '"><div class="fila">' + CC.red(i.red) + '<b>' + esc(i.hora || '--:--') + '</b><span class="grow"></span>' + CC.est(i.estado) + '</div>' +
-        '<div style="margin:4px 0">' + esc(i.gancho) + '</div><div class="sub">' + esc(i.formato) + '</div><div class="btns">' +
-        (i.estado === 'publicado' ? '<button class="small alt" data-a="metricas">📊 Métricas</button>' : '<button class="small ghost" data-a="programar">📅 Mover</button><button class="small okb" data-a="publicar">✅ Publicada</button>') + '</div></li>').join('') +
-        d.sueltas.map((p) => '<li data-pub="' + p.id + '"><div class="fila">' + CC.red(p.red) + '<b>' + new Date(p.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) + '</b><span class="grow"></span>' + CC.est('publicado') + '</div><div style="margin:4px 0">' + esc(p.texto || '(importada)') + '</div><div class="btns"><button class="small alt" data-a="metricas">📊 Métricas</button></div></li>').join('') + '</ul>'
+      (d.ideas.length || d.sueltas.length ? '<ul class="list" id="cDia">' + d.ideas.map((i) => '<li data-id="' + i.id + '"><div class="cont"><div class="fila">' + CC.red(i.red) + '<b>' + esc(i.hora || '--:--') + '</b><span class="grow"></span>' + CC.est(i.estado) + '</div>' +
+        '<div>' + esc(i.gancho) + '</div><div class="sub">' + esc(i.formato) + '</div><div class="btns">' +
+        (i.estado === 'publicado' ? '<button class="small alt" data-a="metricas">📊 Métricas</button>' : '<button class="small ghost" data-a="programar">📅 Mover</button><button class="small okb" data-a="publicar">✅ Publicada</button>') + '</div></div></li>').join('') +
+        d.sueltas.map((p) => '<li data-pub="' + p.id + '"><div class="cont"><div class="fila">' + CC.red(p.red) + '<b>' + new Date(p.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) + '</b><span class="grow"></span>' + CC.est('publicado') + '</div><div>' + esc(p.texto || '(importada)') + '</div><div class="btns"><button class="small alt" data-a="metricas">📊 Métricas</button></div></div></li>').join('') + '</ul>'
         : '<p class="empty">Nada este día.</p>') + '</div>';
     el.querySelector('#cAnt').onclick = () => { mes = mover(-1); pintar(el); };
     el.querySelector('#cSig').onclick = () => { mes = mover(1); pintar(el); };

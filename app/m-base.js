@@ -18,8 +18,8 @@
       '<p class="sub" style="margin:0">' + (cap.libres < 50 && cap.total ? '⚠️ Quedan pocos: recarga la base con el prompt.' : 'Cada combinación estructura + elemento se usa una sola vez.') + '</p>' +
       '<div class="btns" style="flex-wrap:wrap"><button class="small" id="bPrompt">🧠 Prompt para recargar</button><label class="btn small alt" style="margin:0">📄 Importar CSV<input type="file" id="bArch" accept=".csv,.txt,text/csv" hidden></label>' +
       '<button class="small ghost" id="bPegar">📋 Pegar CSV</button><button class="small ghost" id="bMano">＋ A mano</button>' + (!CC.base.length ? '<button class="small okb" id="bPlantilla">🚲 Plantilla bicicletas</button>' : '') + '</div></div>' +
-      (lista.length ? lista.map((t) => '<details class="card" data-t="' + esc(t) + '"' + (abierto === t ? ' open' : '') + '><summary><b>' + esc(t) + '</b> <span class="sub">' + Object.values(temas[t]).reduce((a, b) => a + b, 0) + ' · ' +
-        CATS.filter((c) => temas[t][c[0]]).map((c) => c[1].toLowerCase() + ' ' + temas[t][c[0]]).join(', ') + '</span></summary><div class="cuerpo"></div></details>').join('')
+      (lista.length ? '<div class="grid-2">' + lista.map((t) => '<details class="card" data-t="' + esc(t) + '"' + (abierto === t ? ' open' : '') + '><summary><b>' + esc(t) + '</b> <span class="sub">' + Object.values(temas[t]).reduce((a, b) => a + b, 0) + ' · ' +
+        CATS.filter((c) => temas[t][c[0]]).map((c) => c[1].toLowerCase() + ' ' + temas[t][c[0]]).join(', ') + '</span></summary><div class="cuerpo"></div></details>').join('') + '</div>'
         : '<div class="card"><p class="muted">Aún no hay base. Si eres un taller de bicicletas, toca <b>🚲 Plantilla bicicletas</b>. Para otro rubro, usa <b>🧠 Prompt</b>: lo pegas en un chat gratis, copias el CSV que te entrega y lo pegas aquí.</p></div>');
     el.querySelector('#bPrompt').onclick = () => verPrompt(CC.base.length ? 'recarga' : 'nueva');
     el.querySelector('#bArch').onchange = async (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) importar(Importador.decodificar(await f.arrayBuffer())); };

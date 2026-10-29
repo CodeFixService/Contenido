@@ -11,7 +11,7 @@
     el.innerHTML = CC.titulo('Pedidos', '<span class="sub">' + n('pedido') + ' esperando</span>') +
       (sinPedir ? '<div class="aviso"><div class="grow">Tienes ' + sinPedir + ' ideas de esta semana sin pedir.</div><button class="small" id="pIr">Ver</button></div>' : '') +
       '<div class="chips" id="pFil">' + [['pedido', 'Esperando (' + n('pedido') + ')'], ['recibido', 'Recibidos'], ['cancelado', 'Cancelados'], ['todos', 'Todos']].map(([k, t]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' +
-      (L.length ? L.map(fila).join('') : '<p class="empty">' + (filtro === 'pedido' ? 'No hay pedidos esperando. Pide desde una idea con 📲.' : 'Nada por aquí.') + '</p>');
+      (L.length ? '<div class="grid-2">' + L.map(fila).join('') + '</div>' : '<p class="empty">' + (filtro === 'pedido' ? 'No hay pedidos esperando. Pide desde una idea con 📲.' : 'Nada por aquí.') + '</p>');
     el.querySelector('#pFil').onclick = (e) => { const b = e.target.closest('[data-f]'); if (b) { filtro = b.dataset.f; pintar(el); } };
     const ir = el.querySelector('#pIr'); if (ir) ir.onclick = () => { CC.ir('ideas'); };
     el.onclick = (e) => clic(e, el);
@@ -24,7 +24,7 @@
       (i ? '<div style="margin-bottom:6px">' + CC.red(i.red) + ' <b>' + esc(i.gancho) + '</b></div>' : '') +
       '<details><summary class="sub">Ver mensaje</summary><p style="white-space:pre-line;font-size:13.5px">' + esc(p.instrucciones) + '</p></details>' +
       '<div class="btns">' + (p.estado === 'pedido' ? (p.tel ? '<button class="ghost small" data-a="wa">💬 Recordar</button>' : '') + '<button class="ghost small" data-a="cancelar">Cancelar</button><button class="small okb" data-a="recibido">📥 Recibido</button>'
-        : p.estado === 'recibido' ? '<button class="ghost small" data-a="pedido">↩️ Volver a esperando</button>' : '<button class="ghost small" data-a="pedido">↩️ Reactivar</button>') + '</div></div>';
+        : p.estado === 'recibido' ? '<button class="ghost small" data-a="pedido">🔄 Volver a esperando</button>' : '<button class="ghost small" data-a="pedido">🔄 Reactivar</button>') + '</div></div>';
   }
 
   async function clic(e, el) {

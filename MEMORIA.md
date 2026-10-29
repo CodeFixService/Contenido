@@ -26,4 +26,5 @@ TikTok Studio: UTF-8 con BOM, encabezados en inglés, fecha sin año (año del n
 Columnas desconocidas: se mapean una vez (mapeos_import).
 
 ## Versiones
-- App 1.0 · Base 1.0 · Núcleo 2.2. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".
+- v1.1 (base 1.1): ciclo mensual (resumen_mes + cerrar_mes: Excel del mes, resumen y borra lo diario; las ideas nunca se borran), mi_uso (espacio propio y del servidor para el admin), aviso del día 1–3 para cerrar el mes, consultas con columnas precisas, diseño responsive (2 columnas en computador, lista de publicaciones, menú en filas, barra armada al entrar).
+- App 1.1 · Base 1.1 · Núcleo 2.2. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".

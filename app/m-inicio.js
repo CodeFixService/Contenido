@@ -27,13 +27,13 @@
     const pct = cap.total ? Math.round((cap.libres / cap.total) * 100) : 0;
     const semanasQuedan = Math.floor(cap.libres / Math.max(1, (+CC.emp.ritmo.tiktok || 0) + (+CC.emp.ritmo.instagram || 0) + (+CC.emp.ritmo.facebook || 0) + 7));
     el.innerHTML = CC.titulo('Hola' + (CC.cuenta.nombre ? ', ' + CC.cuenta.nombre.split(' ')[0] : ''), '<span class="sub">Semana del ' + App.fCorta(lun) + '</span>') +
-      '<div class="card"><div class="fila"><h3 class="grow" style="margin:0">Tu semana</h3><b>' + hechos + '/' + pasos.length + '</b></div><div class="barra-cap"><div style="width:' + Math.round((hechos / pasos.length) * 100) + '%"></div></div>' +
+      '<div class="grid-2"><div class="card"><div class="fila"><h3 class="grow" style="margin:0">Tu semana</h3><b>' + hechos + '/' + pasos.length + '</b></div><div class="barra-cap"><div style="width:' + Math.round((hechos / pasos.length) * 100) + '%"></div></div>' +
       '<ul class="list check-sem">' + pasos.map((p) => '<li class="' + (p[1] ? 'ok' : '') + ' clic" data-ir="' + p[3] + '"><span class="ck">' + (p[1] ? '✓' : '') + '</span><div class="grow"><b>' + esc(p[0]) + '</b><div class="sub">' + esc(p[2]) + '</div></div></li>').join('') + '</ul></div>' +
-      '<div class="card"><h3>Hoy</h3>' + (deHoy.length ? '<ul class="list">' + deHoy.map((i) => '<li class="clic" data-ir="ideas"><div class="fila">' + CC.red(i.red) + '<span class="sub">' + esc(i.hora || '') + '</span>' + CC.est(i.estado) + '</div><div style="margin-top:4px">' + esc(i.gancho) + '</div></li>').join('') + '</ul>' : '<p class="empty">Nada programado para hoy.</p>') + '</div>' +
+      '<div class="card"><h3>Hoy</h3>' + (deHoy.length ? '<ul class="list">' + deHoy.map((i) => '<li class="clic" data-ir="ideas"><div class="cont"><div class="fila">' + CC.red(i.red) + '<span class="sub grow">' + esc(i.hora || '') + '</span>' + CC.est(i.estado) + '</div><div>' + esc(i.gancho) + '</div></div></li>').join('') + '</ul>' : '<p class="empty">Nada programado para hoy.</p>') + '</div>' +
       (pend.length ? '<div class="card"><h3>Pedidos esperando material (' + pend.length + ')</h3><ul class="list">' + pend.slice(0, 5).map((p) => '<li class="clic" data-ir="pedidos"><b>' + esc(p.para || 'Sin nombre') + '</b> <span class="sub">' + App.hace(p.fecha_pedido) + '</span></li>').join('') + '</ul></div>' : '') +
       '<div class="card"><div class="fila"><h3 class="grow" style="margin:0">Ganchos sin usar</h3><b>' + cap.libres + '</b></div><div class="barra-cap"><div style="width:' + pct + '%"></div></div>' +
       '<p class="sub" style="margin:0">' + (cap.total ? 'Te alcanzan para unas ' + semanasQuedan + ' semanas a tu ritmo.' : 'Carga la base para empezar.') + (cap.libres < 50 && cap.total ? ' <a href="#base">Recárgala</a>.' : '') + '</p></div>' +
-      (CC.rend && CC.rend.n ? '<div class="card"><h3>Lo que mejor te funciona</h3>' + mejores() + '</div>' : '');
+      (CC.rend && CC.rend.n ? '<div class="card"><h3>Lo que mejor te funciona</h3>' + mejores() + '</div>' : '') + '</div>';
     el.onclick = (e) => { const x = e.target.closest('[data-ir]'); if (x) CC.ir(x.dataset.ir); };
   }
 

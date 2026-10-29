@@ -30,7 +30,8 @@
       form(e) +
       (e ? '<div class="card"><h3>Base de contenido de otra empresa</h3><p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div></div>' +
         '<div class="card"><h3>Mi cuenta</h3><p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
-        '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div></div>' : '');
+        '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div></div>' +
+        '<div class="card" id="eUso"><h3>Espacio y servidor</h3><p class="sub">Cargando…</p></div>' : '');
     const f = el.querySelector('#fEmp');
     f.onsubmit = (ev) => { ev.preventDefault(); guardar(el, e); };
     el.querySelector('#eMasEq').onclick = () => el.querySelector('#eEq').insertAdjacentHTML('beforeend', filaEq({}));
@@ -40,6 +41,7 @@
     el.querySelector('#eNueva').onclick = nueva;
     el.querySelector('#ePrompt').onclick = () => CC.vistas.base.verPrompt('nueva', CC.emp);
     el.querySelector('#eResp').onclick = respaldo;
+    uso(el.querySelector('#eUso'));
     const pro = el.querySelector('#ePro'); if (pro) pro.onclick = () => window.CFX_PAGOS && CFX_PAGOS.abrir({ rpc: App.rpc });
     el.querySelector('#eBorrar').onclick = async () => {
       if (!(await App.confirmar('¿Borrar "' + CC.emp.nombre + '" con toda su base, ideas, pedidos y métricas? No se puede deshacer.\nDescarga antes el respaldo si lo necesitas.', 'Borrar todo'))) return;
@@ -68,6 +70,25 @@
   }
 
   function nueva() { creando = true; CC.ir('empresa'); }
+
+  // Cuánto ocupan tus datos y, si eres administrador, cómo está el servidor completo (límite gratis de Supabase).
+  const kb = (b) => b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+  async function uso(caja) {
+    if (!caja) return;
+    try {
+      const u = await App.rpc('mi_uso');
+      const total = u.tablas.reduce((a, t) => a + Number(t.bytes), 0), filas = u.tablas.reduce((a, t) => a + Number(t.filas), 0);
+      let html = '<h3>Espacio y servidor</h3><p class="sub" style="margin-top:0">Tus datos: <b>' + CC.fmt(filas) + ' filas · ' + kb(total) + '</b> (solo texto).</p>' +
+        '<table class="tabla"><tbody>' + u.tablas.filter((t) => +t.filas).map((t) => '<tr><td>' + esc(t.t) + '</td><td>' + CC.fmt(t.filas) + '</td><td>' + kb(+t.bytes) + '</td></tr>').join('') + '</tbody></table>';
+      if (u.db_bytes != null) {
+        const pct = Math.min(100, Math.round((u.db_bytes / u.limite_bytes) * 100));
+        html += '<h3 style="margin-top:14px">Servidor (todas las cuentas)</h3><div class="fila"><span class="grow">' + kb(u.db_bytes) + ' de ' + kb(u.limite_bytes) + '</span><b style="color:var(--' + (pct < 60 ? 'ok' : pct < 85 ? 'warn' : 'bad') + ')">' + pct + '%</b></div>' +
+          '<div class="barra-cap"><div style="width:' + pct + '%"></div></div><p class="sub" style="margin:0">' + (pct < 60 ? 'Holgado.' : pct < 85 ? 'Cierra los meses terminados en Métricas.' : '⚠️ Casi lleno: cierra meses y limpia desde el Centro de Mando.') + '</p>';
+      }
+      html += '<div class="btns"><button class="small ghost" onclick="CC.ir(\'metricas\')">🗂️ Ciclo mensual</button></div>';
+      caja.innerHTML = html;
+    } catch (e) { caja.innerHTML = '<h3>Espacio y servidor</h3><p class="err">' + esc(e.message) + '</p>'; }
+  }
 
   async function respaldo() {
     try {

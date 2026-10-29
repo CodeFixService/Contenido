@@ -20,7 +20,7 @@
   function tarjeta(i) {
     const bl = i.bloqueados || [];
     const val = (k) => k === 'red' ? CC.red(i.red) + ' <span class="sub">' + (i.fecha_plan ? App.fCorta(i.fecha_plan) + ' · ' : '') + esc(i.hora || '') + '</span>'
-      : k === 'formato' ? esc(i.formato) + (i.duracion_seg && !/Carrusel/.test(i.formato) ? ' <span class="sub">· ' + i.duracion_seg + ' s</span>' : '') : esc(i[k] || '—');
+      : k === 'formato' ? esc(i.formato) + (i.duracion_seg && !/Carrusel/.test(i.formato) ? ' <span class="sub">· ' + i.duracion_seg + ' s</span>' : '') : esc(Motor.may(i[k]) || '—');
     const campos = CAMPOS.map(([k, t]) => '<div class="campo ' + k + '"><span class="et">' + t + '</span><div class="val">' + val(k) + '</div>' +
       (i.estado === 'publicado' ? '' : '<div class="acc"><button type="button" data-r="' + k + '" aria-label="Otra opción de ' + t + '" title="Otra opción">🔄</button>' +
       '<button type="button" data-l="' + k + '" class="' + (bl.includes(k) ? 'lock-on' : '') + '" aria-label="' + (bl.includes(k) ? 'Desbloquear ' : 'Fijar ') + t + '" title="Fijar">' + (bl.includes(k) ? '🔒' : '🔓') + '</button></div>') + '</div>').join('');
@@ -40,10 +40,10 @@
     const cap = CC.ctx ? Motor.capacidad(CC.ctx) : { libres: 0 };
     el.innerHTML = CC.titulo('Ideas', '<button type="button" class="small" id="iGen">＋ Generar</button>') +
       '<div class="chips" id="iFil">' + FILTROS.map(([k, t]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' +
-      (filtro === 'semana' ? '<div class="fila" style="margin-bottom:10px"><button type="button" class="small ghost" id="iAnt" aria-label="Semana anterior">◀</button><b class="grow" style="text-align:center">Semana del ' + App.fCorta(lunes) + '</b><button type="button" class="small ghost" id="iSig" aria-label="Semana siguiente">▶</button></div>' : '') +
+      (filtro === 'semana' ? '<div class="fila nav-sem" style="margin-bottom:10px"><button type="button" class="small ghost" id="iAnt" aria-label="Semana anterior">◀</button><b class="grow" style="text-align:center">Semana del ' + App.fCorta(lunes) + '</b><button type="button" class="small ghost" id="iSig" aria-label="Semana siguiente">▶</button></div>' : '') +
       (cap.libres < 50 && CC.base.length ? '<div class="aviso warn"><div class="grow">Quedan ' + cap.libres + ' ganchos sin usar. Recarga la base para seguir sin repetir.</div><button class="small" onclick="CC.ir(\'base\')">Base</button></div>' : '') +
       (!CC.base.length ? '<div class="card"><h3>Primero carga la base de contenido</h3><p class="muted">Es la materia prima del motor. Usa la plantilla de bicicletas o pega la de tu rubro.</p><button onclick="CC.ir(\'base\')">Ir a la base</button></div>' :
-      L.length ? L.map(tarjeta).join('') : '<p class="empty">' + (filtro === 'semana' ? 'Sin ideas para esta semana. Toca "＋ Generar".' : 'Nada por aquí.') + '</p>');
+      L.length ? '<div class="grid-ideas">' + L.map(tarjeta).join('') + '</div>' : '<p class="empty">' + (filtro === 'semana' ? 'Sin ideas para esta semana. Toca "＋ Generar".' : 'Nada por aquí.') + '</p>');
     el.querySelector('#iGen').onclick = generar;
     el.querySelector('#iFil').onclick = (e) => { const b = e.target.closest('[data-f]'); if (b) { filtro = b.dataset.f; pintar(el); } };
     const a = el.querySelector('#iAnt'), s = el.querySelector('#iSig');
@@ -83,9 +83,9 @@
   }
 
   function mas(i) {
-    const op = [['recibido', '📥 Material recibido'], ['editado', '✂️ Editado'], ['pendiente', '↩️ Volver a sin pedir'], ['nota', '📝 Nota'], ['copiar', '📋 Copiar todo'],
-      [i.estado === 'descartado' ? 'pendiente' : 'descartado', i.estado === 'descartado' ? '♻️ Recuperar' : '🗑️ Descartar']];
-    const d = App.modal('<h2>' + esc(i.gancho) + '</h2><div id="mOp">' + op.map(([k, t]) => '<button type="button" class="opc" data-k="' + k + '" style="width:100%;text-align:left;margin:4px 0">' + t + '</button>').join('') + '</div><div class="btns"><button class="ghost" data-cerrar>Cerrar</button></div>');
+    const op = [['recibido', '📥 Material recibido'], ['editado', '✂️ Editado'], ['pendiente', '🔄 Volver a sin pedir'], ['nota', '📝 Nota'], ['copiar', '📋 Copiar todo'],
+      [i.estado === 'descartado' ? 'pendiente' : 'descartado', i.estado === 'descartado' ? '🔄 Recuperar' : '🗑️ Descartar']];
+    const d = App.modal('<h2>' + esc(i.gancho) + '</h2><div id="mOp">' + op.map(([k, t]) => '<button type="button" class="opc op-fila" data-k="' + k + '">' + t + '</button>').join('') + '</div><div class="btns"><button class="ghost" data-cerrar>Cerrar</button></div>');
     d.querySelector('#mOp').onclick = async (e) => {
       const b = e.target.closest('[data-k]'); if (!b) return;
       const k = b.dataset.k;

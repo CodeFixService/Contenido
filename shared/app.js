@@ -315,6 +315,7 @@
   /* ---------- Notificaciones: insistir hasta que se activen ---------- */
   async function insistirPush() {
     if (!cuenta || sessionStorage.getItem('bt:pushPedido')) return;
+    if (!(publica && publica.config && publica.config.vapid_publica)) return; // sin claves de push configuradas no se ofrece
     if (await subActual()) return;
     sessionStorage.setItem('bt:pushPedido', '1');
     const ios = /iPhone|iPad/.test(navigator.userAgent), instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone;

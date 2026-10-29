@@ -129,7 +129,7 @@ end $$;
 create or replace function public.admin_email() returns text
 language sql immutable as $$ select 'juanjosuecastilloloyola@gmail.com'::text $$;
 create or replace function public.db_version() returns text
-language sql immutable as $$ select '1.0'::text $$;
+language sql immutable as $$ select '1.1'::text $$;
 create or replace function public.cfg_int(c text) returns int
 language sql stable security definer set search_path = '' as $$
   select (valor #>> '{}')::int from public.config where clave = c
@@ -362,6 +362,19 @@ insert into public.guia_redes (red, metrica, tip) values
   ('todas', 'clientes_generados', 'La métrica que manda: anota de qué video llegó cada cliente.')
 on conflict (red, metrica) do update set tip = excluded.tip;
 
+-- 11) Meses cerrados: el resumen de cada mes queda aquí (liviano) y las filas diarias se borran (ciclo mensual).
+create table if not exists public.resumen_mes (
+  id         bigserial primary key,
+  empresa_id uuid not null references public.empresas (id) on delete cascade,
+  red        text not null,
+  mes        date not null check (extract(day from mes) = 1),
+  metrica    text not null,
+  valor      numeric not null,
+  unique (empresa_id, red, mes, metrica)
+);
+create index if not exists rm_empresa_idx on public.resumen_mes (empresa_id, mes);
+alter table public.resumen_mes enable row level security;
+
 -- ---------------------------------------------------------------------
 -- D. Quién soy y reglas de plan
 -- ---------------------------------------------------------------------
@@ -552,7 +565,7 @@ create policy "mis empresas" on public.empresas for all to authenticated using (
 do $$
 declare t text;
 begin
-  foreach t in array array['base_contenido', 'ideas', 'pedidos', 'publicaciones', 'metricas', 'metricas_cuenta', 'audiencia'] loop
+  foreach t in array array['base_contenido', 'ideas', 'pedidos', 'publicaciones', 'metricas', 'metricas_cuenta', 'audiencia', 'resumen_mes'] loop
     execute format('drop policy if exists "de mi empresa" on public.%I', t);
     execute format('create policy "de mi empresa" on public.%I for all to authenticated using (public.mi_empresa(empresa_id)) with check (public.mi_empresa(empresa_id))', t);
   end loop;
@@ -576,7 +589,7 @@ revoke all on all tables in schema public from anon;
 revoke insert, update, delete, truncate on all tables in schema public from authenticated;
 grant select on public.perfiles, public.notificaciones, public.textos, public.planes, public.guia_redes,
   public.empresas, public.base_contenido, public.ideas, public.pedidos, public.publicaciones, public.metricas,
-  public.metricas_cuenta, public.audiencia, public.mapeos_import to authenticated;
+  public.metricas_cuenta, public.audiencia, public.mapeos_import, public.resumen_mes to authenticated;
 grant select on public.textos, public.planes to anon;
 grant insert, update, delete on public.empresas, public.base_contenido, public.ideas, public.pedidos, public.publicaciones,
   public.metricas, public.metricas_cuenta, public.audiencia, public.mapeos_import to authenticated;
@@ -732,6 +745,60 @@ begin
   return jsonb_build_object('filas', n, 'publicaciones_nuevas', nuevas);
 end $$;
 
+-- Cuánto espacio ocupo (filas y tamaño aproximado de mis datos) y meses que ya se pueden cerrar.
+create or replace function public.mi_uso() returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare e uuid[] := array(select id from public.empresas where owner = auth.uid());
+begin
+  if auth.uid() is null then raise exception 'Inicia sesión'; end if;
+  return jsonb_build_object(
+    'tablas', jsonb_build_array(
+      jsonb_build_object('t', 'Base de contenido', 'filas', (select count(*) from public.base_contenido where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.base_contenido x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Ideas', 'filas', (select count(*) from public.ideas where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.ideas x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Pedidos', 'filas', (select count(*) from public.pedidos where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.pedidos x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Publicaciones', 'filas', (select count(*) from public.publicaciones where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.publicaciones x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Métricas por publicación', 'filas', (select count(*) from public.metricas where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.metricas x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Métricas diarias', 'filas', (select count(*) from public.metricas_cuenta where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.metricas_cuenta x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Audiencia', 'filas', (select count(*) from public.audiencia where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.audiencia x where empresa_id = any (e))),
+      jsonb_build_object('t', 'Meses cerrados', 'filas', (select count(*) from public.resumen_mes where empresa_id = any (e)), 'bytes', (select coalesce(sum(pg_column_size(x.*)), 0) from public.resumen_mes x where empresa_id = any (e)))),
+    'limite_bytes', coalesce(public.cfg_int('limite_db_mb'), 500)::bigint * 1048576,
+    'db_bytes', case when public.is_staff() then pg_database_size(current_database()) end);
+end $$;
+
+-- Cierre de mes: guarda el resumen del mes (totales por red y métrica) en resumen_mes y borra lo pesado de ese mes:
+--   · métricas diarias de la cuenta · audiencia antigua (queda la última foto) · cortes repetidos de métricas por publicación (queda el último).
+--   Las ideas NO se borran: guardan qué ganchos ya se usaron (antirrepetición). Solo meses ya terminados.
+create or replace function public.cerrar_mes(p_empresa uuid, p_mes date) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare ini date := date_trunc('month', p_mes)::date; fin date := (date_trunc('month', p_mes) + interval '1 month')::date;
+  n_res int; n_dia int; n_aud int; n_met int; ultima date;
+begin
+  if not public.mi_empresa(p_empresa) then raise exception 'Empresa no encontrada'; end if;
+  if fin > date_trunc('month', (now() at time zone 'America/Santiago'))::date then raise exception 'Solo se cierran meses terminados'; end if;
+  -- Totales del mes (las métricas "_30d" de capturas son fotos: se guarda la última, no la suma).
+  insert into public.resumen_mes (empresa_id, red, mes, metrica, valor)
+  select p_empresa, red, ini, metrica, case when metrica ~ '_\d+d$' then (array_agg(valor order by fecha desc))[1] else sum(valor) end
+  from public.metricas_cuenta where empresa_id = p_empresa and fecha >= ini and fecha < fin group by red, metrica
+  on conflict (empresa_id, red, mes, metrica) do update set valor = excluded.valor;
+  get diagnostics n_res = row_count;
+  -- Publicaciones del mes y sus resultados (últimos), para comparar meses.
+  insert into public.resumen_mes (empresa_id, red, mes, metrica, valor)
+  select p_empresa, p.red, ini, k, sum(v) from public.publicaciones p
+    join lateral (select * from public.metricas m where m.publicacion_id = p.id order by m.fecha_corte desc limit 1) m on true,
+    lateral (values ('pub_publicadas', 1::numeric), ('pub_vistas', coalesce(m.vistas, 0)), ('pub_compartidos', coalesce(m.compartidos, 0)), ('pub_clientes', coalesce(m.clientes_generados, 0))) x(k, v)
+  where p.empresa_id = p_empresa and p.fecha_hora >= ini and p.fecha_hora < fin group by p.red, k
+  on conflict (empresa_id, red, mes, metrica) do update set valor = excluded.valor;
+  delete from public.metricas_cuenta where empresa_id = p_empresa and fecha >= ini and fecha < fin;
+  get diagnostics n_dia = row_count;
+  select max(fecha_corte) into ultima from public.audiencia where empresa_id = p_empresa;
+  delete from public.audiencia where empresa_id = p_empresa and fecha_corte < fin and fecha_corte < ultima;
+  get diagnostics n_aud = row_count;
+  delete from public.metricas m where m.empresa_id = p_empresa and m.fecha_corte < fin
+    and exists (select 1 from public.metricas m2 where m2.publicacion_id = m.publicacion_id and m2.fecha_corte > m.fecha_corte);
+  get diagnostics n_met = row_count;
+  return jsonb_build_object('mes', ini, 'resumen', n_res, 'diarias_borradas', n_dia, 'audiencia_borrada', n_aud, 'cortes_borrados', n_met);
+end $$;
+
 -- Respaldo de mis datos (Excel desde la app: una hoja por tabla).
 create or replace function public.mi_respaldo() returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
@@ -750,7 +817,9 @@ begin
     'Metricas', (select coalesce(jsonb_agg((to_jsonb(m) - 'empresa_id' - 'extra') || jsonb_build_object('empresa', e.nombre) order by m.fecha_corte), '[]')
                  from public.metricas m join public.empresas e on e.id = m.empresa_id where e.owner = auth.uid()),
     'Cuenta', (select coalesce(jsonb_agg(jsonb_build_object('empresa', e.nombre, 'red', c.red, 'fecha', c.fecha, 'metrica', c.metrica, 'valor', c.valor) order by c.fecha), '[]')
-               from public.metricas_cuenta c join public.empresas e on e.id = c.empresa_id where e.owner = auth.uid()));
+               from public.metricas_cuenta c join public.empresas e on e.id = c.empresa_id where e.owner = auth.uid()),
+    'Meses', (select coalesce(jsonb_agg(jsonb_build_object('empresa', e.nombre, 'red', r.red, 'mes', r.mes, 'metrica', r.metrica, 'valor', r.valor) order by r.mes), '[]')
+              from public.resumen_mes r join public.empresas e on e.id = r.empresa_id where e.owner = auth.uid()));
 end $$;
 
 -- Borra todo mi contenido (las empresas y lo que cuelga de ellas). La cuenta se conserva.
@@ -923,6 +992,15 @@ begin
       if coalesce(r.prefs ->> ('av_' || clave), '') <> hoy::text then
         perform public.avisar(r.id, '📊 Métricas de la semana · ' || r.nombre, 'Sube las capturas o archivos de TikTok, Instagram y Facebook. Toma 5 minutos.', '/app/#metricas');
         update public.perfiles set prefs = prefs || jsonb_build_object('av_' || clave, hoy::text) where id = r.id; n := n + 1;
+      end if;
+    end if;
+    -- Días 1 a 3, 10:00: cerrar el mes anterior (si tiene métricas diarias sin cerrar).
+    if extract(day from loc) <= 3 and h >= 10 then
+      clave := 'mes_' || r.emp;
+      if coalesce(r.prefs ->> ('av_' || clave), '') <> to_char(hoy, 'YYYY-MM')
+         and exists (select 1 from public.metricas_cuenta c where c.empresa_id = r.emp and c.fecha < date_trunc('month', hoy)::date) then
+        perform public.avisar(r.id, '🗂️ Cierra el mes · ' || r.nombre, 'Descarga el Excel del mes y libera espacio. Te queda el resumen para comparar.', '/app/#metricas');
+        update public.perfiles set prefs = prefs || jsonb_build_object('av_' || clave, to_char(hoy, 'YYYY-MM')) where id = r.id; n := n + 1;
       end if;
     end if;
     -- 8:00: lo que toca publicar hoy.
@@ -1730,7 +1808,7 @@ revoke all on function public.cfx_guia_app() from public, anon, authenticated;
 --   Nada se borra solo: las vacías se borran con un toque; las que tienen datos piden descargar el respaldo y escribir "sí".
 --   cfx_tablas() = las tablas que crea este archivo (la revisa pruebas/inventario.py --verificar).
 -- ---------------------------------------------------------------------
-create or replace function public.cfx_tablas() returns text[] language sql immutable as $$ select array['public.audiencia', 'public.auditoria', 'public.base_contenido', 'public.cfx_chat', 'public.cfx_config', 'public.cfx_cupones', 'public.cfx_exentos', 'public.cfx_keys', 'public.cfx_pagos', 'public.cfx_registro', 'public.cfx_verificaciones', 'public.config', 'public.empresas', 'public.guia_redes', 'public.ideas', 'public.invitaciones', 'public.mapeos_import', 'public.metricas', 'public.metricas_cuenta', 'public.notificaciones', 'public.pedidos', 'public.perfiles', 'public.planes', 'public.publicaciones', 'public.push_subs', 'public.secretos', 'public.textos'] $$;
+create or replace function public.cfx_tablas() returns text[] language sql immutable as $$ select array['public.audiencia', 'public.auditoria', 'public.base_contenido', 'public.cfx_chat', 'public.cfx_config', 'public.cfx_cupones', 'public.cfx_exentos', 'public.cfx_keys', 'public.cfx_pagos', 'public.cfx_registro', 'public.cfx_verificaciones', 'public.config', 'public.empresas', 'public.guia_redes', 'public.ideas', 'public.invitaciones', 'public.mapeos_import', 'public.metricas', 'public.metricas_cuenta', 'public.notificaciones', 'public.pedidos', 'public.perfiles', 'public.planes', 'public.publicaciones', 'public.push_subs', 'public.resumen_mes', 'public.secretos', 'public.textos'] $$;
 create or replace function public.cfx_inventario() returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare r record; n bigint; out jsonb := '[]'::jsonb;

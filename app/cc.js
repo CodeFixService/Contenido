@@ -4,7 +4,7 @@
   const { $, esc } = App;
   const CC = {
     cuenta: null, empresas: [], emp: null, vista: null, sync: 0,
-    base: [], ideas: [], pedidos: [], pubs: [], metricas: [], mcuenta: [], audiencia: [], guia: [], ctx: null, vistas: {}
+    base: [], ideas: [], pedidos: [], pubs: [], metricas: [], mcuenta: [], audiencia: [], meses: [], guia: [], ctx: null, vistas: {}
   };
 
   /* ---------- íconos ---------- */
@@ -27,11 +27,15 @@
       : '<button type="button" data-v="' + t[0] + '"><span class="i">' + CC.ico(t[0]) + '</span>' + t[1] + '</button>').join('');
     nav.onclick = (e) => { const b = e.target.closest('button[data-v]'); if (b) CC.ir(b.dataset.v); };
     $('bEmpresa').onclick = CC.elegirEmpresa;
+    // La barra del núcleo se arma apenas existen los botones (si su archivo aún no carga, al terminar de cargar).
+    const armar = () => window.CodeFixBarra && window.CodeFixBarra.montar();
+    if (window.CodeFixBarra) armar(); else addEventListener('load', armar);
   };
 
   /* ---------- navegación ---------- */
   CC.ir = function (v) {
     if (v === 'nuevo') { if (!CC.emp) return CC.ir('empresa'); return CC.vistas.ideas && CC.vistas.ideas.generar(); }
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (!$('v-' + v)) v = 'inicio';
     if (!CC.emp && !['empresa', 'base'].includes(v)) v = 'empresa';
     CC.vista = v;
@@ -61,17 +65,18 @@
     const id = CC.emp && CC.emp.id;
     if (!id) return;
     const desde = App.sumarDias(App.hoy(), -180);
-    const [base, ideas, pedidos, pubs, metricas, mcuenta, audiencia, guia] = await Promise.all([
+    const [base, ideas, pedidos, pubs, metricas, mcuenta, audiencia, meses, guia] = await Promise.all([
       q(App.sb.from('base_contenido').select('id,tema,categoria,texto,veces_usado').eq('empresa_id', id).order('id').limit(10000)),
-      q(App.sb.from('ideas').select('*').eq('empresa_id', id).order('created_at', { ascending: false }).limit(5000)),
-      q(App.sb.from('pedidos').select('*').eq('empresa_id', id).order('fecha_pedido', { ascending: false }).limit(500)),
-      q(App.sb.from('publicaciones').select('*').eq('empresa_id', id).order('fecha_hora', { ascending: false }).limit(2000)),
-      q(App.sb.from('metricas').select('*').eq('empresa_id', id).order('fecha_corte', { ascending: false }).limit(5000)),
+      q(App.sb.from('ideas').select('id,combo,tema,formato,estructura,gancho,elemento,toma,texto_pantalla,cta,red,hora,duracion_seg,bloqueados,estado,fecha_plan,nota,created_at').eq('empresa_id', id).order('created_at', { ascending: false }).limit(5000)),
+      q(App.sb.from('pedidos').select('id,idea_id,para,tel,instrucciones,duracion_seg,estado,fecha_pedido,fecha_recibido').eq('empresa_id', id).order('fecha_pedido', { ascending: false }).limit(300)),
+      q(App.sb.from('publicaciones').select('id,idea_id,red,tipo,fecha_hora,texto,link,id_plataforma').eq('empresa_id', id).order('fecha_hora', { ascending: false }).limit(2000)),
+      q(App.sb.from('metricas').select('id,publicacion_id,red,fecha_corte,vistas,espectadores,me_gusta,comentarios,compartidos,guardados,seguidores_nuevos,retencion,visitas_perfil,clientes_generados').eq('empresa_id', id).order('fecha_corte', { ascending: false }).limit(5000)),
       q(App.sb.from('metricas_cuenta').select('red,fecha,metrica,valor').eq('empresa_id', id).gte('fecha', desde).order('fecha').limit(10000)),
       q(App.sb.from('audiencia').select('red,fecha_corte,dimension,valor,porcentaje').eq('empresa_id', id).order('fecha_corte', { ascending: false }).limit(2000)),
+      q(App.sb.from('resumen_mes').select('red,mes,metrica,valor').eq('empresa_id', id).order('mes', { ascending: false }).limit(3000)),
       CC.guia.length ? Promise.resolve(CC.guia) : q(App.sb.from('guia_redes').select('red,metrica,tip'))
     ]);
-    Object.assign(CC, { base, ideas, pedidos, pubs, metricas, mcuenta, audiencia, guia, sync: Date.now() });
+    Object.assign(CC, { base, ideas, pedidos, pubs, metricas, mcuenta, audiencia, meses, guia, sync: Date.now() });
     CC.armarMotor();
   };
   CC.armarMotor = function () {
