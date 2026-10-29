@@ -32,7 +32,7 @@
       '<div id="eAj"></div>' + form(e) +
       (e ? tarjeta('eOtra', '<p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div>') +
         tarjeta('eCuenta', '<p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
-          '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div>') +
+          '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small danger" id="eBorrarTodo">Borrar todos mis datos</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div>') +
         tarjeta('eUso', '<p class="sub">Cargando…</p>') : '') +
       (adm && !creando ? tarjeta('eAvisos', '') + tarjeta('eReg', '') : '');
     const f = el.querySelector('#fEmp');
@@ -61,6 +61,11 @@
     n('eBorrar').onclick = async () => {
       if (!(await App.confirmar('¿Borrar "' + CC.emp.nombre + '" con toda su base, ideas, pedidos y métricas? No se puede deshacer.\nDescarga antes el respaldo si lo necesitas.', 'Borrar todo'))) return;
       try { await App.q(App.sb.from('empresas').delete().eq('id', CC.emp.id)); CC.emp = null; await CC.cargar(); CC.ir(CC.emp ? 'inicio' : 'empresa'); App.toast('Empresa borrada'); } catch (er) { App.toast(er.message); }
+    };
+    // Ley 19.628 / 21.719: el usuario puede borrar todo lo suyo (todas sus empresas e importaciones).
+    n('eBorrarTodo').onclick = async () => {
+      if (!(await App.confirmar('¿Borrar TODAS tus empresas, bases, ideas, pedidos y métricas? Tu cuenta sigue abierta. No se puede deshacer.\nDescarga antes el respaldo si lo necesitas.', 'Borrar todo'))) return;
+      try { await App.q(App.sb.rpc('mi_borrar_datos')); CC.emp = null; await CC.cargar(); CC.ir('empresa'); App.toast('Tus datos fueron borrados'); } catch (er) { App.toast(er.message); }
     };
   }
 
