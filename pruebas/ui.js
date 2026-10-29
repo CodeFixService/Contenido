@@ -8,6 +8,8 @@ const assert = (c, m) => { if (!c) throw new Error('FALLA: ' + m); console.log('
 (async () => {
   const t = await abrir(path.resolve(__dirname, '..'), 'p_contenido');
   const p = t.page;
+  await t.ctx.addInitScript(() => { window.CFX_SIN_GUIA = true; });
+  if (process.env.OSCURO) await p.emulateMedia({ colorScheme: 'dark' });
   const espera = (ms) => p.waitForTimeout(ms || 700);
   try {
     await p.goto(t.base + '/?registro=1'); await espera(800);

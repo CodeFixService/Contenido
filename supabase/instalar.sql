@@ -129,7 +129,7 @@ end $$;
 create or replace function public.admin_email() returns text
 language sql immutable as $$ select 'juanjosuecastilloloyola@gmail.com'::text $$;
 create or replace function public.db_version() returns text
-language sql immutable as $$ select '1.1'::text $$;
+language sql immutable as $$ select '1.2'::text $$;
 create or replace function public.cfg_int(c text) returns int
 language sql stable security definer set search_path = '' as $$
   select (valor #>> '{}')::int from public.config where clave = c
@@ -1024,6 +1024,20 @@ begin
   perform cron.schedule('cc-tareas', '7 * * * *', 'select public.tareas_periodicas()');
 exception when others then
   raise notice 'Tareas automáticas no activadas (%). Activa pg_cron en Supabase → Database → Extensions y vuelve a correr.', sqlerrm;
+end $$;
+
+-- Push (cada minuto): llama a la función "servidor", que envía los avisos nuevos a los celulares con notificaciones activas.
+-- Si la función aún no está desplegada, la llamada no hace nada.
+do $$
+begin
+  create extension if not exists pg_net with schema extensions;
+  perform cron.unschedule(jobid) from cron.job where jobname = 'cc-push';
+  perform cron.schedule('cc-push', '* * * * *', $c$ select net.http_post(
+    url := 'https://vndqseptmymgqyxumbqy.supabase.co/functions/v1/servidor',
+    headers := '{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuZHFzZXB0bXltZ3F5eHVtYnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTIxMjEsImV4cCI6MjEwODc4ODEyMX0.kJKU63-4heUrV7tUtpmDTpfXJvBWp_wgwOyEF5-DO78"}'::jsonb,
+    body := '{}'::jsonb) where exists (select 1 from public.notificaciones where not push_enviado and created_at > now() - interval '1 day') $c$);
+exception when others then
+  raise notice 'Push automático no activado (%). Activa pg_net en Supabase → Database → Extensions y vuelve a correr.', sqlerrm;
 end $$;
 
 -- ---------------------------------------------------------------------

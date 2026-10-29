@@ -118,6 +118,15 @@
     return cuenta;
   }
   const destino = (c) => !c ? 'index.html' : 'app/';
+  // Panel del Centro de Mando (para el administrador y los socios): mismo dominio que esta app.
+  //  · Cloudflare Workers (contenido.<cuenta>.workers.dev) → saas.<cuenta>.workers.dev/admin/
+  //  · Dominio propio (cerebro.codefix.app)                → mando.codefix.app/admin/
+  function urlPanel() {
+    const h = location.hostname, p = h.split('.');
+    if (/\.workers\.dev$/.test(h) && p.length >= 4) return 'https://saas.' + p.slice(1).join('.') + '/admin/';
+    if (p.length >= 3 && !/pages\.dev$|github\.io$/.test(h)) return 'https://mando.' + p.slice(1).join('.') + '/admin/';
+    return 'https://saas.juanjosuecastilloloyola.workers.dev/admin/';
+  }
   // Úsalo al abrir cada panel: sin sesión o con otro rol, vuelve al inicio.
   async function requerir(roles) {
     let c = null;
@@ -129,7 +138,7 @@
     const enAdmin = /\/admin\//.test(location.pathname);
     window.CFX_AYUDA_PEND = Object.assign(window.CFX_AYUDA_PEND || {}, { rpc, app: 'contenido', admin: c.rol !== 'usuario', premium: !!c.premium, id: c.id, hasta: c.premium_hasta,
       nombre: c.nombre, email: c.email, salir,
-      cuenta: () => window.CC && window.CC.ir('empresa'), panel: null });
+      cuenta: () => window.CC && window.CC.ir('empresa'), panel: c.rol !== 'usuario' ? urlPanel() : null });
     if (window.CFX_AYUDA) window.CFX_AYUDA.iniciar(window.CFX_AYUDA_PEND);
     return c;
   }
@@ -302,8 +311,9 @@
   async function sincronizarPush() {
     try { const s = await subActual(); if (!s) return; const j = s.toJSON(); await rpc('push_guardar', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth }); } catch (e) { /* nada */ }
   }
+  const pushListo = () => !!(publica && publica.config && publica.config.vapid_publica);
   async function ofrecerPush(el) {
-    if (!el) return;
+    if (!el || !pushListo()) return; // sin claves de push configuradas no se ofrece
     if (await subActual()) { el.innerHTML = '<p class="sub" style="margin-top:10px">✅ Notificaciones activas en este celular.</p>'; return; }
     el.innerHTML = '<div class="aviso" style="margin-top:12px"><div class="grow">📲 Activa las notificaciones para enterarte aunque tengas la app cerrada.</div>' +
       '<button class="small" type="button">Activar</button></div>';
@@ -462,7 +472,7 @@
     sb, ROOT, $, esc, plata, numero, iso, fechaDe, sumarDias, hoy, fCorta, fLarga, fHora, hace, DIAS, telNorm, wa, estrellas, nota,
     toast, modal, confirmar, friendly, rpc, q, cargarPublica, txt, refrescar, requerir, entrar, salir, crearCuenta, registrar,
     clave, mensajeAcceso, descargar, verImagen, campana, irA, activarPush, ofrecerPush,
-    pushSoportado, registrarSW, pedirInstalar, pie, pestanas, ico, ponerIconos, destino, revisarVersion, actualizar, repararApp, versionMenor, borrarCuenta, borrarMiCuenta,
+    pushSoportado, pushListo, urlPanel, registrarSW, pedirInstalar, pie, pestanas, ico, ponerIconos, destino, revisarVersion, actualizar, repararApp, versionMenor, borrarCuenta, borrarMiCuenta,
     get cuenta() { return cuenta; },
     get publica() { return publica; }
   };

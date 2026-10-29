@@ -27,4 +27,8 @@ Columnas desconocidas: se mapean una vez (mapeos_import).
 
 ## Versiones
 - v1.1 (base 1.1): ciclo mensual (resumen_mes + cerrar_mes: Excel del mes, resumen y borra lo diario; las ideas nunca se borran), mi_uso (espacio propio y del servidor para el admin), aviso del día 1–3 para cerrar el mes, consultas con columnas precisas, diseño responsive (2 columnas en computador, lista de publicaciones, menú en filas, barra armada al entrar).
-- App 1.1 · Base 1.1 · Núcleo 2.2. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".
+- v1.2 (base 1.2): guía de uso (CC.tour) sola 1 vez al día los primeros 5 días (prefs.guia {n, d}) y siempre en Empresa → 📘;
+  botón al panel del Centro de Mando arriba (solo admin/socio, App.urlPanel); push completo: función supabase/functions/servidor (corto.ts carga index.ts de main),
+  cron cc-push cada minuto (pg_net) y tarjeta de admin en Empresa para crear claves y probar el servidor; sin claves no se ofrece activar notificaciones;
+  estructuras de gancho antiguas con mala gramática se reemplazan solas al cargar la empresa; horas en 24 h.
+- App 1.2 · Base 1.2 · Núcleo 2.2. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".

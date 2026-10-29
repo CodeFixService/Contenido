@@ -16,7 +16,8 @@
     metricas: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
     base: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
     empresa: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>'
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    panel: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>'
   };
   CC.ico = (n, s) => '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[n] || '') + '</svg>';
   CC.TABS = [['inicio', 'Inicio'], ['ideas', 'Ideas'], ['nuevo', 'Generar'], ['calendario', 'Calendario'], ['pedidos', 'Pedidos'], ['metricas', 'Métricas'], ['base', 'Base'], ['empresa', 'Empresa']];
@@ -77,8 +78,23 @@
       CC.guia.length ? Promise.resolve(CC.guia) : q(App.sb.from('guia_redes').select('red,metrica,tip'))
     ]);
     Object.assign(CC, { base, ideas, pedidos, pubs, metricas, mcuenta, audiencia, meses, guia, sync: Date.now() });
+    if (await CC.arreglarEstructuras()) return CC.cargarEmpresa();
     CC.armarMotor();
   };
+  // Bases antiguas traían plantillas de gancho con mala gramática ("¿Sigues {error}?", "esta {parte}"):
+  // se reemplazan solas por las actuales (las ideas ya creadas no cambian; se pueden refrescar con 🔄).
+  const VIEJAS = /¿Sigues \{error\}|Si notas que \{sintoma\}|esta \{parte\}|te dice que \{sintoma\}|\{error\} te puede costar \{costo\}|Nadie te dice que \{dato\}'?$/i;
+  CC.arreglarEstructuras = async function () {
+    const est = CC.base.filter((b) => b.tema === 'General' && b.categoria === 'estructura_gancho');
+    if (!est.some((b) => VIEJAS.test(b.texto))) return false;
+    const malas = est.filter((b) => !Motor.ESTRUCTURAS_BASE.includes(b.texto)); // se reemplaza el juego completo
+    try {
+      await App.q(App.sb.from('base_contenido').delete().in('id', malas.map((b) => b.id)));
+      await App.rpc('base_importar', { p_empresa: CC.emp.id, p_filas: Motor.ESTRUCTURAS_BASE.map((texto) => ({ tema: 'General', categoria: 'estructura_gancho', texto })) });
+      return true;
+    } catch (e) { return false; }
+  };
+
   CC.armarMotor = function () {
     CC.rend = Motor.rendimiento(CC.ideas, CC.pubs, CC.metricas);
     CC.ctx = Motor.contexto(CC.base, CC.ideas, { rendimiento: CC.rend, horas: CC.mejoresHoras() });
@@ -223,6 +239,46 @@
         CC.armarMotor(); d.close(); App.toast('Métricas guardadas'); CC.repintar();
       } catch (e) { App.toast(e.message); }
     };
+  };
+
+  /* ---------- guía de uso: se muestra sola 1 vez al día durante los primeros 5 días (y siempre desde Empresa) ---------- */
+  const PASOS = [
+    ['🧠', 'Así funciona Cerebro', 'Cargas la base de tu rubro, el motor arma ideas que no se repiten, pides las grabaciones por WhatsApp, publicas y mides. Cada semana igual, sin quedarte en blanco.', null],
+    ['🏢', '1. Tu empresa', 'Completa el perfil, el ritmo por red y quiénes graban (nombre y WhatsApp). Si manejas varias marcas, cada una es una empresa.', 'empresa'],
+    ['🗂️', '2. La base', 'Es la materia prima: partes, síntomas, errores, mitos y datos de tu rubro. Usa la plantilla o el 🧠 Prompt para crearla o recargarla.', 'base'],
+    ['✨', '3. Generar', 'El botón + del centro arma la semana completa. Cada gancho se usa una sola vez y lo que mejor rinde sale más seguido.', 'ideas'],
+    ['🔄', '4. Ajustar', 'En cada idea, 🔄 da otra opción de ese campo y 🔒 lo fija para que no cambie.', 'ideas'],
+    ['📲', '5. Pedir y recibir', 'Pedir abre WhatsApp con el mensaje listo. Cuando llegue el video, márcalo 📥 Recibido en Pedidos.', 'pedidos'],
+    ['📅', '6. Programar y publicar', 'Ponle fecha, edítalo y al subirlo marca ✅ Publicada con la hora real y el link.', 'calendario'],
+    ['📊', '7. Medir (domingo)', 'Sube los archivos o capturas de Meta y TikTok y anota los clientes 🎯 que trajo cada video. Con eso el motor aprende.', 'metricas'],
+    ['🔁', '8. Cada mes', 'Cierra el mes en Métricas: descargas el Excel, queda el resumen y se libera espacio. Tus ideas no se borran.', 'metricas']
+  ];
+  CC.tour = function (forzar) {
+    const g = Object.assign({ n: 0, d: '' }, (CC.cuenta && CC.cuenta.prefs && CC.cuenta.prefs.guia) || {});
+    if (!forzar && (window.CFX_SIN_GUIA || g.n >= 5 || g.d === App.hoy() || document.querySelector('dialog[open]'))) return; // CFX_SIN_GUIA: solo pruebas
+    if (!forzar) {
+      const nueva = { n: g.n + 1, d: App.hoy() };
+      CC.cuenta.prefs = Object.assign({}, CC.cuenta.prefs, { guia: nueva });
+      App.rpc('mi_perfil_guardar', { p_nombre: null, p_telefono: null, p_prefs: { guia: nueva } }).catch(() => {});
+    }
+    let k = 0;
+    const d = App.modal('<div class="guia"><div class="g-ico" id="gIco"></div><h2 id="gT"></h2><p class="muted" id="gX"></p><div class="g-puntos" id="gP"></div>' +
+      '<div class="btns"><button class="ghost" id="gAnt">Anterior</button><button id="gSig">Siguiente</button></div>' +
+      '<div class="fila g-pie"><button type="button" class="small ghost" id="gIr">Ir ahí</button><span class="grow"></span>' + (forzar ? '' : '<button type="button" class="small ghost" id="gNo">No mostrar más</button>') + '</div></div>');
+    const pintar = () => {
+      const p = PASOS[k];
+      d.querySelector('#gIco').textContent = p[0]; d.querySelector('#gT').textContent = p[1]; d.querySelector('#gX').textContent = p[2];
+      d.querySelector('#gP').innerHTML = PASOS.map((_, i) => '<i class="' + (i === k ? 'on' : '') + '"></i>').join('');
+      d.querySelector('#gAnt').disabled = k === 0;
+      d.querySelector('#gSig').textContent = k === PASOS.length - 1 ? '¡Listo!' : 'Siguiente';
+      d.querySelector('#gIr').classList.toggle('hidden', !p[3]);
+    };
+    d.querySelector('#gAnt').onclick = () => { if (k > 0) { k--; pintar(); } };
+    d.querySelector('#gSig').onclick = () => { if (k < PASOS.length - 1) { k++; pintar(); } else d.close(); };
+    d.querySelector('#gIr').onclick = () => { const v = PASOS[k][3]; d.close(); CC.ir(v); };
+    const no = d.querySelector('#gNo');
+    if (no) no.onclick = () => { const fin = { n: 5, d: App.hoy() }; CC.cuenta.prefs = Object.assign({}, CC.cuenta.prefs, { guia: fin }); App.rpc('mi_perfil_guardar', { p_nombre: null, p_telefono: null, p_prefs: { guia: fin } }).catch(() => {}); d.close(); };
+    pintar();
   };
 
   global.CC = CC;

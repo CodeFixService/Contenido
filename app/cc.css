@@ -107,3 +107,19 @@ main button:not(.icon-btn):not(.opc), main .btn, dialog .card button:not(.opc) {
   dialog .card { max-width: 520px; }
 }
 @media (max-width: 370px) { .idea .campo .et { width: 62px; font-size: 10.5px; } .idea .botones button { font-size: 12.5px; } }
+
+/* Guía de uso */
+.guia { text-align: center; }
+.guia .g-ico { font-size: 44px; line-height: 1; margin: 6px 0 10px; }
+.guia h2 { margin: 0 0 6px; text-align: center; }
+.guia .g-pie button.hidden + .grow { display: none; }
+.guia p { min-height: 66px; margin: 0 auto; max-width: 420px; }
+.guia .g-puntos { display: flex; justify-content: center; gap: 6px; margin: 14px 0 4px; }
+.guia .g-puntos i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.guia .g-puntos i.on { background: var(--brand); width: 18px; border-radius: 4px; }
+.guia .btns { margin-top: 10px; }
+.guia .btns button { flex: 1; }
+.guia .g-pie { margin-top: 6px; }
+header.top a.icon-btn { flex: none; }
+.idea .cab .sub.grow { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.idea .cab .pill { flex: none; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

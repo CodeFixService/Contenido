@@ -30,8 +30,9 @@
       form(e) +
       (e ? '<div class="card"><h3>Base de contenido de otra empresa</h3><p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div></div>' +
         '<div class="card"><h3>Mi cuenta</h3><p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
-        '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div></div>' +
-        '<div class="card" id="eUso"><h3>Espacio y servidor</h3><p class="sub">Cargando…</p></div>' : '');
+        '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div></div>' +
+        '<div class="card" id="eUso"><h3>Espacio y servidor</h3><p class="sub">Cargando…</p></div>' +
+        (CC.cuenta.is_admin ? '<div class="card" id="eAvisos"></div>' : '') : '');
     const f = el.querySelector('#fEmp');
     f.onsubmit = (ev) => { ev.preventDefault(); guardar(el, e); };
     el.querySelector('#eMasEq').onclick = () => el.querySelector('#eEq').insertAdjacentHTML('beforeend', filaEq({}));
@@ -42,6 +43,8 @@
     el.querySelector('#ePrompt').onclick = () => CC.vistas.base.verPrompt('nueva', CC.emp);
     el.querySelector('#eResp').onclick = respaldo;
     uso(el.querySelector('#eUso'));
+    el.querySelector('#eGuia').onclick = () => CC.tour(true);
+    if (el.querySelector('#eAvisos')) avisos(el.querySelector('#eAvisos'));
     const pro = el.querySelector('#ePro'); if (pro) pro.onclick = () => window.CFX_PAGOS && CFX_PAGOS.abrir({ rpc: App.rpc });
     el.querySelector('#eBorrar').onclick = async () => {
       if (!(await App.confirmar('¿Borrar "' + CC.emp.nombre + '" con toda su base, ideas, pedidos y métricas? No se puede deshacer.\nDescarga antes el respaldo si lo necesitas.', 'Borrar todo'))) return;
@@ -88,6 +91,34 @@
       html += '<div class="btns"><button class="small ghost" onclick="CC.ir(\'metricas\')">🗂️ Ciclo mensual</button></div>';
       caja.innerHTML = html;
     } catch (e) { caja.innerHTML = '<h3>Espacio y servidor</h3><p class="err">' + esc(e.message) + '</p>'; }
+  }
+
+  // Notificaciones push (solo el súper administrador): claves y prueba de la función "servidor".
+  function avisos(caja) {
+    const k = App.pushListo();
+    caja.innerHTML = '<h3>🔔 Notificaciones con la app cerrada</h3>' +
+      '<ul class="list check-sem"><li class="' + (k ? 'ok' : '') + '"><span class="ck">' + (k ? '✓' : '1') + '</span><div class="grow"><b>Crear las claves</b><div class="sub">Se crean aquí con un toque.</div></div></li>' +
+      '<li id="avFn"><span class="ck">2</span><div class="grow"><b>Función "servidor" en Supabase</b><div class="sub">Edge Functions → Deploy a new function → nombre <b>servidor</b> → pega el contenido de supabase/functions/servidor/corto.ts → Deploy.</div></div></li></ul>' +
+      '<div class="btns"><button class="small' + (k ? ' ghost' : '') + '" id="avK">' + (k ? 'Crear claves nuevas' : 'Crear claves') + '</button><button class="small alt" id="avP">Probar servidor</button></div><p class="sub" id="avR" style="margin:6px 0 0"></p>';
+    caja.querySelector('#avK').onclick = async () => {
+      if (k && !(await App.confirmar('Con claves nuevas todos deberán activar las notificaciones otra vez.', 'Continuar'))) return;
+      try {
+        const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+        const raw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey)), jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+        const b64u = (u) => btoa(String.fromCharCode.apply(null, u)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        await App.rpc('admin_push_claves', { p_publica: b64u(raw), p_privada: jwk.d });
+        await App.cargarPublica(); App.toast('Claves creadas: ya puedes activar las notificaciones'); avisos(caja);
+      } catch (e) { App.toast(e.message); }
+    };
+    caja.querySelector('#avP').onclick = async () => {
+      const r = caja.querySelector('#avR'); r.textContent = 'Probando…';
+      try {
+        const { data, error } = await App.sb.functions.invoke('servidor', { body: { accion: 'ping' } });
+        const ok = !error && data && data.servicio;
+        r.textContent = error ? 'No responde: despliega la función "servidor" (paso 2).' : ok ? '✅ Funciona (v' + data.version + '). Activa las notificaciones en la campana 🔔.' : 'Responde, pero sin clave de servicio.';
+        caja.querySelector('#avFn').classList.toggle('ok', !!ok);
+      } catch (e) { r.textContent = 'No responde: despliega la función "servidor" (paso 2).'; }
+    };
   }
 
   async function respaldo() {
