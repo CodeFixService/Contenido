@@ -98,7 +98,7 @@ const assert = (c, m) => { if (!c) throw new Error('FALLA: ' + m); console.log('
     // Inicio, pedidos, base y empresa
     for (const v of ['inicio', 'pedidos', 'base', 'empresa']) { await p.evaluate((x) => CC.ir(x), v); await espera(700); assert(await t.anchoOk(), 'ancho 360 ' + v); await t.foto('07-' + v); }
     // Prompt para otra empresa
-    await p.click('#ePrompt'); await espera(400);
+    await p.click('.cfx-aj > [data-k=otra]'); await espera(300); await p.click('#ePrompt'); await espera(400);
     assert(/tema,categoria,texto/.test(await p.inputValue('#prT')), 'prompt con el formato CSV');
     await t.foto('08-prompt');
   } catch (e) { console.log(e.message); await t.foto('error'); }

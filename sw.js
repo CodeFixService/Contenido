@@ -79,7 +79,7 @@ self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { title: e.data && e.data.text() }; }
   e.waitUntil(self.registration.showNotification(d.title || 'Cerebro', {
-    body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: d.tag, data: { url: d.url || '/' }, renotify: true, vibrate: [200, 100, 200]
+    body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/badge.png', tag: d.tag, data: { url: d.url || '/' }, renotify: true, vibrate: [200, 100, 200]
   }));
 });
 self.addEventListener('notificationclick', (e) => {

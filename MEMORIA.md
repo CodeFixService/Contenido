@@ -31,4 +31,7 @@ Columnas desconocidas: se mapean una vez (mapeos_import).
   botón al panel del Centro de Mando arriba (solo admin/socio, App.urlPanel); push completo: función supabase/functions/servidor (corto.ts carga index.ts de main),
   cron cc-push cada minuto (pg_net) y tarjeta de admin en Empresa para crear claves y probar el servidor; sin claves no se ofrece activar notificaciones;
   estructuras de gancho antiguas con mala gramática se reemplazan solas al cargar la empresa; horas en 24 h.
-- App 1.2 · Base 1.2 · Núcleo 2.2. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".
+- v1.3 (base 1.3): núcleo 2.4 (botón ⇄ Panel al Centro de Mando lo pone el núcleo; ya no hay #bPanel ni App.urlPanel), Empresa en cuadrícula de Ajustes
+  (Perfil, Otra empresa, Mi cuenta, Espacio; admin: Notificaciones y Registro con botones para borrar), sin tarjetas apiladas (`main data-sin-pila`),
+  botón ✅ Publicada sin cortarse, ícono de notificación propio (icons/badge.png).
+- App 1.3 · Base 1.3 · Núcleo 2.4. Cada cambio: subir VERSION (shared/config.js + version.json) y, si cambia la base, db_version() + "bd".

@@ -24,7 +24,7 @@ header.top .emp-chip .logo { width: 34px; height: 34px; border-radius: 10px; fle
 .idea .campo .acc { flex: none; display: flex; gap: 4px; }
 .idea .campo .acc button { width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 9px; background: var(--field); border: 1px solid var(--line); font-size: 14px; box-shadow: none; color: var(--text); }
 .idea .campo .acc button.lock-on { background: color-mix(in srgb, var(--gold) 25%, transparent); border-color: var(--gold); }
-.idea .botones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.idea .botones { display: grid; grid-template-columns: 1fr 1fr 1.3fr 42px; gap: 6px; margin-top: 8px; }
 .idea .botones button { min-height: 40px; padding: 0 4px; font-size: 13px; }
 .idea.descartado { opacity: .5; }
 .red { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 99px; color: #fff; letter-spacing: .02em; }

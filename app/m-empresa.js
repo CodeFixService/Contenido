@@ -8,7 +8,7 @@
     e = e || { redes: ['tiktok', 'instagram', 'facebook'], ritmo: { tiktok: 7, instagram: 5, facebook: 5, historias: 4 }, equipo: [] };
     const r = Object.assign({ tiktok: 7, instagram: 5, facebook: 5, historias: 4 }, e.ritmo || {});
     const equipo = (e.equipo || []).length ? e.equipo : [{ nombre: '', tel: '' }];
-    return '<form id="fEmp" class="card"><h3>' + (e.id ? 'Perfil de la empresa' : 'Nueva empresa') + '</h3>' +
+    return '<form id="fEmp" class="card">' + (e.id ? '' : '<h3>Nueva empresa</h3>') +
       '<label for="eNom">Nombre</label><input id="eNom" maxlength="80" required value="' + esc(e.nombre || '') + '" placeholder="Ej: Ciclo Service">' +
       '<label for="eRub">Rubro</label><input id="eRub" maxlength="80" value="' + esc(e.rubro || '') + '" placeholder="Ej: taller de bicicletas">' +
       '<label for="ePub">Público (a quién le hablas)</label><input id="ePub" maxlength="300" value="' + esc(e.publico || '') + '" placeholder="Ej: hombres 25–44 que andan en bici en Santiago">' +
@@ -23,30 +23,42 @@
   }
   const filaEq = (p) => '<div class="equipo-fila"><input placeholder="Nombre" maxlength="40" value="' + esc(p.nombre || '') + '" data-k="nombre"><input placeholder="WhatsApp" inputmode="tel" maxlength="20" value="' + esc(p.tel || '') + '" data-k="tel"><button type="button" class="ghost" data-q aria-label="Quitar">✕</button></div>';
 
+  // Con empresa: Ajustes en cuadrícula del núcleo (CFX_AJUSTES); sin empresa: la bienvenida y el formulario para crearla.
   function pintar(el) {
-    const e = creando || !CC.emp ? null : CC.emp;
+    const e = creando || !CC.emp ? null : CC.emp, adm = !!CC.cuenta.is_admin;
+    const tarjeta = (id, h) => '<div class="card" id="' + id + '">' + h + '</div>';
     el.innerHTML = CC.titulo(e ? 'Empresa' : 'Tu empresa') +
       (!CC.empresas.length ? '<div class="card"><h3>¡Bienvenido a Cerebro! 🧠</h3><p class="muted" style="margin:0">Crea tu empresa, carga su base de contenido y el motor te arma la semana: ganchos que no se repiten, pedidos por WhatsApp, calendario y métricas.</p></div>' : '') +
-      form(e) +
-      (e ? '<div class="card"><h3>Base de contenido de otra empresa</h3><p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div></div>' +
-        '<div class="card"><h3>Mi cuenta</h3><p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
-        '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div></div>' +
-        '<div class="card" id="eUso"><h3>Espacio y servidor</h3><p class="sub">Cargando…</p></div>' +
-        (CC.cuenta.is_admin ? '<div class="card" id="eAvisos"></div>' : '') : '');
+      '<div id="eAj"></div>' + form(e) +
+      (e ? tarjeta('eOtra', '<p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div>') +
+        tarjeta('eCuenta', '<p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
+          '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div>') +
+        tarjeta('eUso', '<p class="sub">Cargando…</p>') : '') +
+      (adm && !creando ? tarjeta('eAvisos', '') + tarjeta('eReg', '') : '');
     const f = el.querySelector('#fEmp');
     f.onsubmit = (ev) => { ev.preventDefault(); guardar(el, e); };
     el.querySelector('#eMasEq').onclick = () => el.querySelector('#eEq').insertAdjacentHTML('beforeend', filaEq({}));
     el.querySelector('#eEq').onclick = (ev) => { const q = ev.target.closest('[data-q]'); if (q) q.parentNode.remove(); };
     const c = el.querySelector('#eCancel'); if (c) c.onclick = () => { creando = false; pintar(el); };
+    const n = (id) => el.querySelector('#' + id);
+    if (adm && !creando) avisos(n('eAvisos'));
+    const S = [
+      e && { k: 'perfil', ico: '🏢', t: 'Perfil de la empresa', d: 'Nombre, público, tono y equipo', nodo: f },
+      e && { k: 'otra', ico: '➕', t: 'Otra empresa', d: 'Nueva empresa y su prompt', nodo: n('eOtra') },
+      e && { k: 'cuenta', ico: '👤', t: 'Mi cuenta', d: 'Guía, respaldo y plan', nodo: n('eCuenta') },
+      e && { k: 'uso', ico: '📦', t: 'Espacio y servidor', d: 'Cuánto ocupan tus datos', nodo: n('eUso'), abrir: () => uso(n('eUso')) },
+      adm && !creando && { k: 'avisos', ico: '🔔', t: 'Notificaciones', d: 'Claves y servidor', nodo: n('eAvisos') },
+      adm && !creando && { k: 'registro', ico: '📜', t: 'Registro', d: 'Lo que se hizo y borrarlo', nodo: n('eReg'), abrir: () => { const r = n('eReg'); r.innerHTML = ''; window.CFX_AJUSTES.registro(r, App.rpc, { lista: true }); } }
+    ].filter(Boolean);
+    // Sin empresa el formulario queda a la vista; la cuadrícula (solo admin) va debajo.
+    if (S.length && window.CFX_AJUSTES) { if (!e) el.appendChild(n('eAj')); window.CFX_AJUSTES.montar(n('eAj'), S); }
     if (!e) return;
-    el.querySelector('#eNueva').onclick = nueva;
-    el.querySelector('#ePrompt').onclick = () => CC.vistas.base.verPrompt('nueva', CC.emp);
-    el.querySelector('#eResp').onclick = respaldo;
-    uso(el.querySelector('#eUso'));
-    el.querySelector('#eGuia').onclick = () => CC.tour(true);
-    if (el.querySelector('#eAvisos')) avisos(el.querySelector('#eAvisos'));
-    const pro = el.querySelector('#ePro'); if (pro) pro.onclick = () => window.CFX_PAGOS && CFX_PAGOS.abrir({ rpc: App.rpc });
-    el.querySelector('#eBorrar').onclick = async () => {
+    n('eNueva').onclick = nueva;
+    n('ePrompt').onclick = () => CC.vistas.base.verPrompt('nueva', CC.emp);
+    n('eResp').onclick = respaldo;
+    n('eGuia').onclick = () => CC.tour(true);
+    const pro = n('ePro'); if (pro) pro.onclick = () => window.CFX_PAGOS && CFX_PAGOS.abrir({ rpc: App.rpc });
+    n('eBorrar').onclick = async () => {
       if (!(await App.confirmar('¿Borrar "' + CC.emp.nombre + '" con toda su base, ideas, pedidos y métricas? No se puede deshacer.\nDescarga antes el respaldo si lo necesitas.', 'Borrar todo'))) return;
       try { await App.q(App.sb.from('empresas').delete().eq('id', CC.emp.id)); CC.emp = null; await CC.cargar(); CC.ir(CC.emp ? 'inicio' : 'empresa'); App.toast('Empresa borrada'); } catch (er) { App.toast(er.message); }
     };
@@ -81,7 +93,7 @@
     try {
       const u = await App.rpc('mi_uso');
       const total = u.tablas.reduce((a, t) => a + Number(t.bytes), 0), filas = u.tablas.reduce((a, t) => a + Number(t.filas), 0);
-      let html = '<h3>Espacio y servidor</h3><p class="sub" style="margin-top:0">Tus datos: <b>' + CC.fmt(filas) + ' filas · ' + kb(total) + '</b> (solo texto).</p>' +
+      let html = '<p class="sub" style="margin-top:0">Tus datos: <b>' + CC.fmt(filas) + ' filas · ' + kb(total) + '</b> (solo texto).</p>' +
         '<table class="tabla"><tbody>' + u.tablas.filter((t) => +t.filas).map((t) => '<tr><td>' + esc(t.t) + '</td><td>' + CC.fmt(t.filas) + '</td><td>' + kb(+t.bytes) + '</td></tr>').join('') + '</tbody></table>';
       if (u.db_bytes != null) {
         const pct = Math.min(100, Math.round((u.db_bytes / u.limite_bytes) * 100));
@@ -90,13 +102,13 @@
       }
       html += '<div class="btns"><button class="small ghost" onclick="CC.ir(\'metricas\')">🗂️ Ciclo mensual</button></div>';
       caja.innerHTML = html;
-    } catch (e) { caja.innerHTML = '<h3>Espacio y servidor</h3><p class="err">' + esc(e.message) + '</p>'; }
+    } catch (e) { caja.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
   }
 
   // Notificaciones push (solo el súper administrador): claves y prueba de la función "servidor".
   function avisos(caja) {
     const k = App.pushListo();
-    caja.innerHTML = '<h3>🔔 Notificaciones con la app cerrada</h3>' +
+    caja.innerHTML = '<p class="sub" style="margin-top:0">Para que los avisos lleguen con la app cerrada.</p>' +
       '<ul class="list check-sem"><li class="' + (k ? 'ok' : '') + '"><span class="ck">' + (k ? '✓' : '1') + '</span><div class="grow"><b>Crear las claves</b><div class="sub">Se crean aquí con un toque.</div></div></li>' +
       '<li id="avFn"><span class="ck">2</span><div class="grow"><b>Función "servidor" en Supabase</b><div class="sub">Edge Functions → Deploy a new function → nombre <b>servidor</b> → pega el contenido de supabase/functions/servidor/corto.ts → Deploy.</div></div></li></ul>' +
       '<div class="btns"><button class="small' + (k ? ' ghost' : '') + '" id="avK">' + (k ? 'Crear claves nuevas' : 'Crear claves') + '</button><button class="small alt" id="avP">Probar servidor</button></div><p class="sub" id="avR" style="margin:6px 0 0"></p>';

@@ -118,15 +118,6 @@
     return cuenta;
   }
   const destino = (c) => !c ? 'index.html' : 'app/';
-  // Panel del Centro de Mando (para el administrador y los socios): mismo dominio que esta app.
-  //  · Cloudflare Workers (contenido.<cuenta>.workers.dev) → saas.<cuenta>.workers.dev/admin/
-  //  · Dominio propio (cerebro.codefix.app)                → mando.codefix.app/admin/
-  function urlPanel() {
-    const h = location.hostname, p = h.split('.');
-    if (/\.workers\.dev$/.test(h) && p.length >= 4) return 'https://saas.' + p.slice(1).join('.') + '/admin/';
-    if (p.length >= 3 && !/pages\.dev$|github\.io$/.test(h)) return 'https://mando.' + p.slice(1).join('.') + '/admin/';
-    return 'https://saas.juanjosuecastilloloyola.workers.dev/admin/';
-  }
   // Úsalo al abrir cada panel: sin sesión o con otro rol, vuelve al inicio.
   async function requerir(roles) {
     let c = null;
@@ -136,9 +127,9 @@
     if (roles && !roles.includes(c.rol)) { location.replace(ROOT + destino(c)); return new Promise(() => {}); }
     // Núcleo (ayuda.js): cabecera común [campana][FREE/PRO][foto], menú de la cuenta, ayuda y sensación Premium.
     const enAdmin = /\/admin\//.test(location.pathname);
-    window.CFX_AYUDA_PEND = Object.assign(window.CFX_AYUDA_PEND || {}, { rpc, app: 'contenido', admin: c.rol !== 'usuario', premium: !!c.premium, id: c.id, hasta: c.premium_hasta,
+    window.CFX_AYUDA_PEND = Object.assign(window.CFX_AYUDA_PEND || {}, { rpc, app: 'contenido', admin: c.rol !== 'usuario', socio: c.rol === 'socio', premium: !!c.premium, id: c.id, hasta: c.premium_hasta,
       nombre: c.nombre, email: c.email, salir,
-      cuenta: () => window.CC && window.CC.ir('empresa'), panel: c.rol !== 'usuario' ? urlPanel() : null });
+      cuenta: () => window.CC && window.CC.ir('empresa') }); // el botón ⇄ Panel (Centro de Mando) lo pone el núcleo
     if (window.CFX_AYUDA) window.CFX_AYUDA.iniciar(window.CFX_AYUDA_PEND);
     return c;
   }
@@ -472,7 +463,7 @@
     sb, ROOT, $, esc, plata, numero, iso, fechaDe, sumarDias, hoy, fCorta, fLarga, fHora, hace, DIAS, telNorm, wa, estrellas, nota,
     toast, modal, confirmar, friendly, rpc, q, cargarPublica, txt, refrescar, requerir, entrar, salir, crearCuenta, registrar,
     clave, mensajeAcceso, descargar, verImagen, campana, irA, activarPush, ofrecerPush,
-    pushSoportado, pushListo, urlPanel, registrarSW, pedirInstalar, pie, pestanas, ico, ponerIconos, destino, revisarVersion, actualizar, repararApp, versionMenor, borrarCuenta, borrarMiCuenta,
+    pushSoportado, pushListo, registrarSW, pedirInstalar, pie, pestanas, ico, ponerIconos, destino, revisarVersion, actualizar, repararApp, versionMenor, borrarCuenta, borrarMiCuenta,
     get cuenta() { return cuenta; },
     get publica() { return publica; }
   };

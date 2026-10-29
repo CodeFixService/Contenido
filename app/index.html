@@ -14,8 +14,8 @@
 <script src="../shared/humano.js"></script>
 </head>
 <body class="con-tabs">
-<header class="top"><button type="button" class="emp-chip" id="bEmpresa" aria-label="Cambiar de empresa"><span class="logo" id="logoEmp"></span><span id="nomEmp">Cerebro</span><span class="flecha">▾</span></button><a class="icon-btn hidden" id="bPanel" aria-label="Ir al panel del Centro de Mando" title="Panel"></a><button class="icon-btn" id="bCampana" aria-label="Avisos" style="position:relative"></button></header>
-<main>
+<header class="top"><button type="button" class="emp-chip" id="bEmpresa" aria-label="Cambiar de empresa"><span class="logo" id="logoEmp"></span><span id="nomEmp">Cerebro</span><span class="flecha">▾</span></button><button class="icon-btn" id="bCampana" aria-label="Avisos" style="position:relative"></button></header>
+<main data-sin-pila>
   <section class="view on" id="v-inicio"></section><section class="view" id="v-ideas"></section><section class="view" id="v-calendario"></section>
   <section class="view" id="v-pedidos"></section><section class="view" id="v-metricas"></section><section class="view" id="v-base"></section><section class="view" id="v-empresa"></section>
 </main>
@@ -44,7 +44,6 @@
   // Sin claves de push el núcleo no ofrece activar notificaciones (se activan en Empresa → Notificaciones).
   if (!App.pushListo()) App.activarPush = undefined;
   CC.montarBarra();
-  if (c.rol !== 'usuario') { const bp = document.getElementById('bPanel'); bp.href = App.urlPanel(); bp.innerHTML = CC.ico('panel', 20); bp.classList.remove('hidden'); }
   App.campana(document.getElementById('bCampana'));
   try { await CC.cargar(); } catch (e) { App.toast(e.message); }
   // Núcleo (pagos): cuenta nueva que debe su primer pago → pantalla de activación.

@@ -26,8 +26,8 @@ const assert = (c, m) => { if (!c) throw new Error('FALLA: ' + m); console.log('
     const adm = await t.sim.crearUsuario('juanjosuecastilloloyola@gmail.com', 'admin123');
     await p.goto(t.base + '/'); await p.fill('input[type=email]', 'juanjosuecastilloloyola@gmail.com'); await p.fill('input[type=password]', 'admin123'); await p.press('input[type=password]', 'Enter');
     await p.waitForURL(/app/); await p.waitForTimeout(1500); await t.sinModales();
-    const href = await p.getAttribute('#bPanel', 'href');
-    assert(/\/admin\/$/.test(href || '') && !(await p.locator('#bPanel.hidden').count()), 'botón al panel para el admin: ' + href);
+    const href = await p.getAttribute('.cfx-atajo', 'href');
+    assert(/\/admin\/$/.test(href || '') && !(await p.locator('.cfx-atajo.cfx-oc').count()), 'botón al panel para el admin: ' + href);
     await t.foto('panel-admin');
   } catch (e) { console.log(e.message); await t.foto('error-guia'); }
   console.log('ERRORES:', t.errores.join('\n') || 'ninguno');
