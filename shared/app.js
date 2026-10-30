@@ -245,7 +245,7 @@
         d.close(); irA(n.dataset.url);
       };
       const bb = d.querySelector('[data-borrar]');
-      if (bb) bb.onclick = async () => { if (!(await confirmar('¿Borrar todos tus avisos?', 'Borrar'))) return; await sb.from('notificaciones').delete().eq('para', cuenta.id); d.close(); cargar(); };
+      if (bb) bb.onclick = async () => { if (!(await confirmar('¿Borrar todos tus avisos?', 'Borrar'))) return; if (window.CFX_ANIM) await window.CFX_ANIM.salirTodos(); await sb.from('notificaciones').delete().eq('para', cuenta.id); d.close(); cargar(); };
       ofrecerPush(d.querySelector('#btPush'));
       const ids = avisos.filter((a) => !a.leida).map((a) => a.id);
       if (ids.length) sb.from('notificaciones').update({ leida: true }).in('id', ids).then(() => cargar());
@@ -255,7 +255,7 @@
     if (canal) sb.removeChannel(canal);
     canal = sb.channel('avisos-' + cuenta.id)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificaciones', filter: 'para=eq.' + cuenta.id }, (p) => {
-        toast('🔔 ' + (p.new && p.new.titulo || 'Nuevo aviso'));
+        if (window.CFX_ANIM) window.CFX_ANIM.emergente({ titulo: p.new && p.new.titulo, cuerpo: p.new && p.new.cuerpo }); else toast('🔔 ' + (p.new && p.new.titulo || 'Nuevo aviso'));
         cargar();
       })
       .subscribe();
