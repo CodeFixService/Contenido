@@ -11,7 +11,7 @@
     return '<form id="fEmp" class="card">' + (e.id ? '' : '<h3>Nueva empresa</h3>') +
       '<label for="eNom">Nombre</label><input id="eNom" maxlength="80" required value="' + esc(e.nombre || '') + '" placeholder="Ej: Ciclo Service">' +
       '<label for="eRub">Rubro</label><input id="eRub" maxlength="80" value="' + esc(e.rubro || '') + '" placeholder="Ej: taller de bicicletas">' +
-      '<label for="ePub">Público (a quién le hablas)</label><input id="ePub" maxlength="300" value="' + esc(e.publico || '') + '" placeholder="Ej: hombres 25–44 que andan en bici en Santiago">' +
+      '<label for="ePub">Público (a quién le hablas)</label><input id="ePub" maxlength="300" value="' + esc(e.publico || '') + '" placeholder="Ej: hombres 25–44 ciclistas">' +
       '<label for="eSer">Servicios o productos</label><textarea id="eSer" rows="2" maxlength="600">' + esc(e.servicios || '') + '</textarea>' +
       '<label for="eTon">Tono</label><input id="eTon" maxlength="200" value="' + esc(e.tono || '') + '" placeholder="Ej: cercano, directo, técnico pero simple">' +
       '<label for="eCol">Colores de marca</label><input id="eCol" maxlength="200" value="' + esc(e.colores || '') + '" placeholder="Ej: negro, blanco, plomo, verde lima">' +
