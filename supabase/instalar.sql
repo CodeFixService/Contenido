@@ -129,7 +129,7 @@ end $$;
 create or replace function public.admin_email() returns text
 language sql immutable as $$ select 'juanjosuecastilloloyola@gmail.com'::text $$;
 create or replace function public.db_version() returns text
-language sql immutable as $$ select '1.5'::text $$;
+language sql immutable as $$ select '1.6'::text $$;
 create or replace function public.cfg_int(c text) returns int
 language sql stable security definer set search_path = '' as $$
   select (valor #>> '{}')::int from public.config where clave = c
@@ -536,6 +536,17 @@ begin
 end $$;
 drop trigger if exists empresas_antes on public.empresas;
 create trigger empresas_antes before insert or update on public.empresas for each row execute function public.empresas_antes();
+-- Al administrador (y socios): se creó una empresa nueva.
+create or replace function public.empresas_nueva() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if not exists (select 1 from public.perfiles where id = new.owner and rol in ('admin', 'socio')) then
+    perform public.avisar_staff('🏢 Nueva empresa', new.nombre || coalesce(' · ' || (select email from public.perfiles where id = new.owner), ''), '/app/#empresa');
+  end if;
+  return new;
+end $$;
+drop trigger if exists empresas_nueva on public.empresas;
+create trigger empresas_nueva after insert on public.empresas for each row execute function public.empresas_nueva();
 
 create or replace function public.ideas_antes() returns trigger
 language plpgsql security definer set search_path = '' as $$
@@ -1008,7 +1019,7 @@ begin
       clave := 'hoy_' || r.emp;
       if coalesce(r.prefs ->> ('av_' || clave), '') <> hoy::text
          and exists (select 1 from public.ideas i where i.empresa_id = r.emp and i.fecha_plan = hoy and i.estado in ('programado', 'editado')) then
-        perform public.avisar(r.id, '🚀 Hoy publicas · ' || r.nombre,
+        perform public.avisar(r.id, '📅 Hoy publicas · ' || r.nombre,
           (select count(*) from public.ideas i where i.empresa_id = r.emp and i.fecha_plan = hoy and i.estado in ('programado', 'editado')) || ' pieza(s) programadas para hoy.', '/app/#calendario');
         update public.perfiles set prefs = prefs || jsonb_build_object('av_' || clave, hoy::text) where id = r.id; n := n + 1;
       end if;
@@ -1085,7 +1096,7 @@ begin
   loop
     execute 'revoke execute on function ' || r.f || ' from public, anon, authenticated';
     if r.proname in ('preparar_cuenta', 'cancelar_invitacion', 'preparar_borrado', 'push_pendientes', 'push_borrar_endpoint', 'auto_actualizar',
-                     'tareas_periodicas', 'avisar', 'avisar_staff', 'empresas_antes', 'ideas_antes', 'handle_new_user') then
+                     'tareas_periodicas', 'avisar', 'avisar_staff', 'empresas_antes', 'empresas_nueva', 'ideas_antes', 'handle_new_user') then
       if exists (select 1 from pg_roles where rolname = 'service_role') then execute 'grant execute on function ' || r.f || ' to service_role'; end if;
     else
       execute 'grant execute on function ' || r.f || ' to authenticated';
@@ -1499,6 +1510,28 @@ begin
   perform public.cfx_anotar('aviso', p_destino || ' (' || n || '): ' || p_titulo);
   return n;
 end $$;
+
+-- ---------- Nueva versión disponible: push a todos al liberar (una sola vez por versión) ----------
+-- La llama el Centro de Mando después de liberar (Apps → Liberar) con las notas que se escriben ahí.
+create table if not exists public.cfx_versiones (version text primary key, notas text not null default '', avisados int not null default 0, creado timestamptz not null default now());
+alter table public.cfx_versiones enable row level security;
+create or replace function public.cfx_avisar_version(p_version text, p_notas text default '', p_app text default '') returns int
+language plpgsql security definer set search_path = '' as $$
+declare u uuid; n int := 0; v text := trim(coalesce(p_version, '')); nt text := left(trim(coalesce(p_notas, '')), 140);
+begin
+  perform public.super_check();
+  if v !~ '^[0-9]+(\.[0-9]+){0,3}$' then raise exception 'Versión no válida'; end if;
+  if exists (select 1 from public.cfx_versiones where version = v) then return 0; end if;
+  for u in select * from public.cfx_destinatarios('todos') loop
+    perform public.cfx_avisar(u, '🚀 Nueva versión disponible', left(coalesce(nullif(trim(p_app), '') || ' ', '') || 'v' || v || case when nt <> '' then ' · ' || nt else '' end || '. Se actualiza sola al abrirla.', 240));
+    n := n + 1;
+  end loop;
+  insert into public.cfx_versiones (version, notas, avisados) values (v, nt, n);
+  perform public.cfx_anotar('version', 'v' || v || ' avisada a ' || n);
+  return n;
+end $$;
+revoke execute on function public.cfx_avisar_version(text, text, text) from public, anon;
+grant execute on function public.cfx_avisar_version(text, text, text) to authenticated;
 
 -- ---------- Keys de Premium (de un solo uso). Se guardan cifradas: el código completo solo se ve al crearlas. ----------
 create or replace function public.cfx_keys_crear(p_n int, p_rol text, p_dias int, p_nota text default '') returns jsonb
@@ -2035,7 +2068,7 @@ grant execute on function public.cfx_es_socio(), public.cfx_socios_lista(), publ
 --   Nada se borra solo: las vacías se borran con un toque; las que tienen datos piden descargar el respaldo y escribir "sí".
 --   cfx_tablas() = las tablas que crea este archivo (la revisa pruebas/inventario.py --verificar).
 -- ---------------------------------------------------------------------
-create or replace function public.cfx_tablas() returns text[] language sql immutable as $$ select array['public.audiencia', 'public.auditoria', 'public.base_contenido', 'public.cfx_chat', 'public.cfx_config', 'public.cfx_cupones', 'public.cfx_exentos', 'public.cfx_keys', 'public.cfx_pagos', 'public.cfx_ref_codigos', 'public.cfx_referidos', 'public.cfx_registro', 'public.cfx_socios', 'public.cfx_verificaciones', 'public.config', 'public.empresas', 'public.guia_redes', 'public.ideas', 'public.invitaciones', 'public.mapeos_import', 'public.metricas', 'public.metricas_cuenta', 'public.notificaciones', 'public.pedidos', 'public.perfiles', 'public.planes', 'public.publicaciones', 'public.push_subs', 'public.resumen_mes', 'public.secretos', 'public.textos'] $$;
+create or replace function public.cfx_tablas() returns text[] language sql immutable as $$ select array['public.audiencia', 'public.auditoria', 'public.base_contenido', 'public.cfx_chat', 'public.cfx_config', 'public.cfx_cupones', 'public.cfx_exentos', 'public.cfx_keys', 'public.cfx_pagos', 'public.cfx_ref_codigos', 'public.cfx_referidos', 'public.cfx_registro', 'public.cfx_socios', 'public.cfx_verificaciones', 'public.cfx_versiones', 'public.config', 'public.empresas', 'public.guia_redes', 'public.ideas', 'public.invitaciones', 'public.mapeos_import', 'public.metricas', 'public.metricas_cuenta', 'public.notificaciones', 'public.pedidos', 'public.perfiles', 'public.planes', 'public.publicaciones', 'public.push_subs', 'public.resumen_mes', 'public.secretos', 'public.textos'] $$;
 create or replace function public.cfx_inventario() returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare r record; n bigint; out jsonb := '[]'::jsonb;

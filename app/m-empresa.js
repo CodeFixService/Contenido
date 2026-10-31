@@ -29,7 +29,7 @@
     const tarjeta = (id, h) => '<div class="card" id="' + id + '">' + h + '</div>';
     el.innerHTML = CC.titulo(e ? 'Empresa' : 'Tu empresa') +
       (!CC.empresas.length ? '<div class="card"><h3>¡Bienvenido a Cerebro! 🧠</h3><p class="muted" style="margin:0">Crea tu empresa, carga su base de contenido y el motor te arma la semana: ganchos que no se repiten, pedidos por WhatsApp, calendario y métricas.</p></div>' : '') +
-      '<div id="eAj"></div>' + form(e) +
+      '<div id="eAj"></div>' + (!e && adm && !creando ? '<details class="card" id="eNuevaD"><summary style="cursor:pointer;font-weight:800">＋ Nueva empresa</summary>' + form(e) + '</details>' : form(e)) +
       (e ? tarjeta('eOtra', '<p class="sub" style="margin-top:0">Para un cliente nuevo: crea la empresa, copia el prompt, pégalo en un chat gratis y pega el CSV que te devuelve en Base.</p><div class="btns" style="flex-wrap:wrap"><button class="small" id="eNueva">＋ Nueva empresa</button><button class="small ghost" id="ePrompt">🧠 Prompt de esta empresa</button></div>') +
         tarjeta('eCuenta', '<p class="muted" style="margin-top:0">' + esc(CC.cuenta.email) + ' · ' + (CC.cuenta.premium ? 'Pro' + (CC.cuenta.premium_hasta ? ' hasta ' + App.fCorta(CC.cuenta.premium_hasta.slice(0, 10)) : '') : 'Gratis') + '</p>' +
           '<div class="btns" style="flex-wrap:wrap"><button class="small ghost" id="eGuia">📘 Guía de uso</button><button class="small ghost" id="eResp">⬇️ Respaldo Excel</button>' + (CC.cuenta.premium ? '' : '<button class="small gold" id="ePro">⭐ Pasar a Pro</button>') + '<button class="small danger" id="eBorrar">Borrar esta empresa</button><button class="small danger" id="eBorrarTodo">Borrar todos mis datos</button><button class="small ghost" onclick="App.salir()">Cerrar sesión</button></div>') +
@@ -47,7 +47,7 @@
     const S = [
       e && { k: 'perfil-emp', ico: '🏢', t: 'Perfil de la empresa', d: 'Nombre, público, tono y equipo', grupo: 'Tu empresa', nodo: f },
       e && { k: 'otra', ico: '➕', t: 'Otra empresa', d: 'Nueva empresa y su prompt', grupo: 'Tu empresa', nodo: n('eOtra') },
-      e && { k: 'uso', ico: '📦', t: 'Espacio y servidor', d: 'Cuánto ocupan tus datos', grupo: 'Tu empresa', nodo: nUso, abrir: () => uso(nUso) },
+      e && { k: 'uso', ico: '📦', t: 'Espacio de tus datos', d: 'Cuánto ocupan tus datos', grupo: 'Tu empresa', nodo: nUso, abrir: () => uso(nUso) },
       e && { k: 'micuenta', ico: '🗂️', t: 'Respaldo, guía y borrar', d: 'Excel, guía de uso y borrar datos', grupo: 'Tu empresa', nodo: n('eCuenta') },
       adm && !creando && { k: 'avisos', ico: '🔔', t: 'Notificaciones', d: 'Claves y servidor', grupo: 'Administración', nodo: n('eAvisos') },
       adm && !creando && { k: 'registro', ico: '📜', t: 'Registro', d: 'Lo que se hizo y borrarlo', grupo: 'Administración', nodo: nReg, abrir: () => { nReg.innerHTML = ''; window.CFX_AJUSTES.registro(nReg, App.rpc, { lista: true }); } }
@@ -94,7 +94,7 @@
 
   function nueva() { creando = true; CC.ir('empresa'); }
 
-  // Cuánto ocupan tus datos y, si eres administrador, cómo está el servidor completo (límite gratis de Supabase).
+  // Cuánto ocupan tus datos (el servidor completo se ve en el Centro de Mando).
   const kb = (b) => b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
   async function uso(caja) {
     if (!caja) return;
@@ -103,11 +103,7 @@
       const total = u.tablas.reduce((a, t) => a + Number(t.bytes), 0), filas = u.tablas.reduce((a, t) => a + Number(t.filas), 0);
       let html = '<p class="sub" style="margin-top:0">Tus datos: <b>' + CC.fmt(filas) + ' filas · ' + kb(total) + '</b> (solo texto).</p>' +
         '<table class="tabla"><tbody>' + u.tablas.filter((t) => +t.filas).map((t) => '<tr><td>' + esc(t.t) + '</td><td>' + CC.fmt(t.filas) + '</td><td>' + kb(+t.bytes) + '</td></tr>').join('') + '</tbody></table>';
-      if (u.db_bytes != null) {
-        const pct = Math.min(100, Math.round((u.db_bytes / u.limite_bytes) * 100));
-        html += '<h3 style="margin-top:14px">Servidor (todas las cuentas)</h3><div class="fila"><span class="grow">' + kb(u.db_bytes) + ' de ' + kb(u.limite_bytes) + '</span><b style="color:var(--' + (pct < 60 ? 'ok' : pct < 85 ? 'warn' : 'bad') + ')">' + pct + '%</b></div>' +
-          '<div class="barra-cap"><div style="width:' + pct + '%"></div></div><p class="sub" style="margin:0">' + (pct < 60 ? 'Holgado.' : pct < 85 ? 'Cierra los meses terminados en Métricas.' : '⚠️ Casi lleno: cierra meses y limpia desde el Centro de Mando.') + '</p>';
-      }
+      // El servidor completo (todas las cuentas) se ve en el Centro de Mando → Resumen.
       html += '<div class="btns"><button class="small ghost" onclick="CC.ir(\'metricas\')">🗂️ Ciclo mensual</button></div>';
       caja.innerHTML = html;
     } catch (e) { caja.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
@@ -117,8 +113,9 @@
   function avisos(caja) {
     const k = App.pushListo();
     caja.innerHTML = '<p class="sub" style="margin-top:0">Para que los avisos lleguen con la app cerrada.</p>' +
+      '<details class="av-pasos"><summary class="sub" style="cursor:pointer;font-weight:700">Ver los pasos de instalación</summary>' +
       '<ul class="list check-sem"><li class="' + (k ? 'ok' : '') + '"><span class="ck">' + (k ? '✓' : '1') + '</span><div class="grow"><b>Crear las claves</b><div class="sub">Se crean aquí con un toque.</div></div></li>' +
-      '<li id="avFn"><span class="ck">2</span><div class="grow"><b>Función "servidor" en Supabase</b><div class="sub">Edge Functions → Deploy a new function → nombre <b>servidor</b> → pega el contenido de supabase/functions/servidor/corto.ts → Deploy.</div></div></li></ul>' +
+      '<li id="avFn"><span class="ck">2</span><div class="grow"><b>Función "servidor" en Supabase</b><div class="sub">Edge Functions → Deploy a new function → nombre <b>servidor</b> → pega el contenido de supabase/functions/servidor/corto.ts → Deploy.</div></div></li></ul>' + '</details>' +
       '<div class="btns"><button class="small' + (k ? ' ghost' : '') + '" id="avK">' + (k ? 'Crear claves nuevas' : 'Crear claves') + '</button><button class="small alt" id="avP">Probar servidor</button></div><p class="sub" id="avR" style="margin:6px 0 0"></p>';
     caja.querySelector('#avK').onclick = async () => {
       if (k && !(await App.confirmar('Con claves nuevas todos deberán activar las notificaciones otra vez.', 'Continuar'))) return;
