@@ -130,9 +130,18 @@
     window.CFX_AYUDA_PEND = Object.assign(window.CFX_AYUDA_PEND || {}, { rpc, app: 'contenido', admin: c.rol !== 'usuario', socio: c.rol === 'socio', premium: !!c.premium, id: c.id, hasta: c.premium_hasta,
       nombre: c.nombre, email: c.email, salir,
       cuenta: () => window.CC && window.CC.ir('empresa') }); // el botón ⇄ Panel (Centro de Mando) lo pone el núcleo
+    if (!window.CFX_PERFIL_APP) window.CFX_PERFIL_APP = perfil;
     if (window.CFX_AYUDA) window.CFX_AYUDA.iniciar(window.CFX_AYUDA_PEND);
     return c;
   }
+  // Perfil común del núcleo (ayuda.js → CFX_PERFIL): nombre, contraseña y borrar la cuenta. Cada página lo hereda ({ __proto__: App.perfil, … }).
+  const perfil = {
+    nombre: () => (cuenta && cuenta.nombre) || '', correo: () => cuenta && cuenta.email,
+    guardar: async (d) => { await rpc('mi_perfil_guardar', { p_nombre: d.nombre || null, p_telefono: null }); if (cuenta && d.nombre) cuenta.nombre = d.nombre; },
+    clave: async (n) => { const { error } = await sb.auth.updateUser({ password: n }); if (error) throw new Error(friendly(error)); },
+    eliminarTexto: 'Se elimina tu cuenta y todos tus datos para siempre.',
+    eliminar: async () => { if (await confirmar('Se elimina tu cuenta y todos tus datos para siempre.', 'Eliminar cuenta')) { await borrarMiCuenta(); location.replace(ROOT); } }
+  };
   async function entrar(email, password) {
     const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
     if (error) throw new Error(friendly(error));
@@ -462,7 +471,7 @@
   global.App = {
     sb, ROOT, $, esc, plata, numero, iso, fechaDe, sumarDias, hoy, fCorta, fLarga, fHora, hace, DIAS, telNorm, wa, estrellas, nota,
     toast, modal, confirmar, friendly, rpc, q, cargarPublica, txt, refrescar, requerir, entrar, salir, crearCuenta, registrar,
-    clave, mensajeAcceso, descargar, verImagen, campana, irA, activarPush, ofrecerPush,
+    perfil, clave, mensajeAcceso, descargar, verImagen, campana, irA, activarPush, ofrecerPush,
     pushSoportado, pushListo, registrarSW, pedirInstalar, pie, pestanas, ico, ponerIconos, destino, revisarVersion, actualizar, repararApp, versionMenor, borrarCuenta, borrarMiCuenta,
     get cuenta() { return cuenta; },
     get publica() { return publica; }

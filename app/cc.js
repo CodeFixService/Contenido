@@ -6,6 +6,9 @@
     cuenta: null, empresas: [], emp: null, vista: null, sync: 0,
     base: [], ideas: [], pedidos: [], pubs: [], metricas: [], mcuenta: [], audiencia: [], meses: [], guia: [], ctx: null, vistas: {}
   };
+  // Perfil común del núcleo (ayuda.js → CFX_PERFIL, en el menú de la foto): nombre y cuenta (App.perfil); foto, color y modo en este celular (BASE).
+  global.CFX_PERFIL_APP = { __proto__: App.perfil, colores: ['#8b5cf6', '#6366f1', '#3d63ff', '#0891b2', '#16a34a', '#d97706', '#ea580c', '#e0457b', '#dc2626', '#334155'] };
+
 
   /* ---------- íconos ---------- */
   const IC = {
