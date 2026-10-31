@@ -23,7 +23,7 @@
   }
   const filaEq = (p) => '<div class="equipo-fila"><input placeholder="Nombre" maxlength="40" value="' + esc(p.nombre || '') + '" data-k="nombre"><input placeholder="WhatsApp" inputmode="tel" maxlength="20" value="' + esc(p.tel || '') + '" data-k="tel"><button type="button" class="ghost" data-q aria-label="Quitar">✕</button></div>';
 
-  // Con empresa: Ajustes en cuadrícula del núcleo (CFX_AJUSTES); sin empresa: la bienvenida y el formulario para crearla.
+  // Con empresa: menú común del núcleo (CFX_MENU); sin empresa: la bienvenida y el formulario para crearla (y el menú debajo).
   function pintar(el) {
     const e = creando || !CC.emp ? null : CC.emp, adm = !!CC.cuenta.is_admin;
     const tarjeta = (id, h) => '<div class="card" id="' + id + '">' + h + '</div>';
@@ -42,16 +42,19 @@
     const c = el.querySelector('#eCancel'); if (c) c.onclick = () => { creando = false; pintar(el); };
     const n = (id) => el.querySelector('#' + id);
     if (adm && !creando) avisos(n('eAvisos'));
+    // Las tarjetas se guardan antes: al abrir su hoja se mueven fuera de la página y n() ya no las encontraría.
+    const nUso = n('eUso'), nReg = n('eReg');
     const S = [
-      e && { k: 'perfil', ico: '🏢', t: 'Perfil de la empresa', d: 'Nombre, público, tono y equipo', nodo: f },
-      e && { k: 'otra', ico: '➕', t: 'Otra empresa', d: 'Nueva empresa y su prompt', nodo: n('eOtra') },
-      e && { k: 'cuenta', ico: '👤', t: 'Mi cuenta', d: 'Guía, respaldo y plan', nodo: n('eCuenta') },
-      e && { k: 'uso', ico: '📦', t: 'Espacio y servidor', d: 'Cuánto ocupan tus datos', nodo: n('eUso'), abrir: () => uso(n('eUso')) },
-      adm && !creando && { k: 'avisos', ico: '🔔', t: 'Notificaciones', d: 'Claves y servidor', nodo: n('eAvisos') },
-      adm && !creando && { k: 'registro', ico: '📜', t: 'Registro', d: 'Lo que se hizo y borrarlo', nodo: n('eReg'), abrir: () => { const r = n('eReg'); r.innerHTML = ''; window.CFX_AJUSTES.registro(r, App.rpc, { lista: true }); } }
+      e && { k: 'perfil-emp', ico: '🏢', t: 'Perfil de la empresa', d: 'Nombre, público, tono y equipo', grupo: 'Tu empresa', nodo: f },
+      e && { k: 'otra', ico: '➕', t: 'Otra empresa', d: 'Nueva empresa y su prompt', grupo: 'Tu empresa', nodo: n('eOtra') },
+      e && { k: 'uso', ico: '📦', t: 'Espacio y servidor', d: 'Cuánto ocupan tus datos', grupo: 'Tu empresa', nodo: nUso, abrir: () => uso(nUso) },
+      e && { k: 'micuenta', ico: '🗂️', t: 'Respaldo, guía y borrar', d: 'Excel, guía de uso y borrar datos', grupo: 'Tu empresa', nodo: n('eCuenta') },
+      adm && !creando && { k: 'avisos', ico: '🔔', t: 'Notificaciones', d: 'Claves y servidor', grupo: 'Administración', nodo: n('eAvisos') },
+      adm && !creando && { k: 'registro', ico: '📜', t: 'Registro', d: 'Lo que se hizo y borrarlo', grupo: 'Administración', nodo: nReg, abrir: () => { nReg.innerHTML = ''; window.CFX_AJUSTES.registro(nReg, App.rpc, { lista: true }); } }
     ].filter(Boolean);
     // Sin empresa el formulario queda a la vista; la cuadrícula (solo admin) va debajo.
-    if (S.length && window.CFX_AJUSTES) { if (!e) el.appendChild(n('eAj')); window.CFX_AJUSTES.montar(n('eAj'), S); }
+    // Menú común del núcleo (lista + hoja): las opciones de la empresa, tu perfil y Cuenta y ayuda. Sin empresa: el formulario arriba y el menú debajo.
+    if (window.CFX_MENU) { if (!e) el.appendChild(n('eAj')); window.CFX_MENU.montar(n('eAj'), S); }
     if (!e) return;
     n('eNueva').onclick = nueva;
     n('ePrompt').onclick = () => CC.vistas.base.verPrompt('nueva', CC.emp);
