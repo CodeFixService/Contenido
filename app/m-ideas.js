@@ -124,9 +124,17 @@
     d.querySelector('#gOk').onclick = async () => {
       const rit = {}; ['tiktok', 'instagram', 'facebook', 'historias'].forEach((k) => { rit[k] = Math.max(0, Math.min(21, +d.querySelector('#gR_' + k).value || 0)); });
       const l = d.querySelector('#gSem').value;
-      if (ya(l) && !(await App.confirmar('Esa semana ya tiene ' + ya(l) + ' ideas. ¿Agregar ' + (rit.tiktok + rit.instagram + rit.facebook + (rit.historias ? 7 : 0)) + ' más?', 'Agregar'))) return;
+      // Semana ya hecha: se reemplaza. Las ideas sin usar (pendientes) se borran y sus ganchos quedan libres otra vez;
+      // las que ya se pidieron, grabaron o publicaron se mantienen.
+      const viejas = CC.ideas.filter((i) => CC.enSemana(i.fecha_plan, l) && (i.estado === 'pendiente' || i.estado === 'descartado'));
+      if (ya(l) && !(await App.confirmar('Esa semana ya tiene ' + ya(l) + ' ideas. ¿Reemplazarla? Se borran las ' + viejas.length + ' sin usar (sus ganchos quedan libres) y se genera de nuevo.', 'Reemplazar semana'))) return;
       const b = d.querySelector('#gOk'); b.disabled = true; b.textContent = 'Generando…';
       try {
+        if (viejas.length) {
+          const ids = viejas.map((i) => i.id);
+          await App.q(App.sb.from('ideas').delete().in('id', ids));
+          CC.ideas = CC.ideas.filter((i) => !ids.includes(i.id)); CC.armarMotor();
+        }
         const nuevas = Motor.semana(CC.ctx, rit, l);
         if (!nuevas.length) throw new Error('No quedan combinaciones: recarga la base.');
         await CC.guardarNuevas(nuevas);
