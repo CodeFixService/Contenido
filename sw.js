@@ -2,7 +2,7 @@
    Cada celular usa la versión que tiene guardada; cuando se libera una versión nueva (Centro de Mando → Apps → Liberar)
    la app la descarga completa y se actualiza sola. Cada versión vive en su caché "cc-app-<versión>" y "cc-meta" guarda la actual. */
 const ARCHIVOS = ['./', 'index.html', 'manifest.webmanifest', 'version.json', 'icons/icon-192.png', 'icons/icon-512.png',
-  'shared/app.css', 'shared/app.js', 'shared/datos.js', 'shared/carga.js', 'shared/config.js', 'shared/vendor/supabase.js', 'shared/tema.css',
+  'shared/app.css', 'shared/app.js', 'shared/vitrina.js', 'shared/datos.js', 'shared/carga.js', 'shared/config.js', 'shared/vendor/supabase.js', 'shared/tema.css',
   'shared/humano.js', 'shared/iconos.js', 'shared/instalar.js', 'shared/barra.js', 'shared/auto.js', 'shared/fotos.js', 'shared/voz.js', 'shared/respaldo.js', 'shared/pagos.js', 'shared/verificar.js', 'shared/premium.js', 'shared/ayuda.js',
   'app/', 'app/index.html', 'app/cc.css', 'app/cc.js', 'app/motor.js', 'app/importador.js',
   'app/m-inicio.js', 'app/m-ideas.js', 'app/m-pedidos.js', 'app/m-calendario.js', 'app/m-metricas.js', 'app/m-base.js', 'app/m-empresa.js',
