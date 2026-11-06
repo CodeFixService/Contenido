@@ -68,8 +68,6 @@
   function seguir(c) { if (volver && volver.startsWith('/') && !volver.startsWith('//')) location.replace(volver); else location.replace(App.ROOT + App.destino(c)); }
   let recuperando = /type=recovery/.test(location.hash);
   App.sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { recuperando = true; ver('vNueva'); } });
-  if (recuperando) { ver('vNueva'); return; }
-  try { const c = await App.refrescar(); if (c && !recuperando) { seguir(c); return; } } catch (e) { /* sin sesión */ }
   $('tR').onclick = () => ver('vRegistro');
   if (new URLSearchParams(location.search).has('registro')) ver('vRegistro'); // link o QR de invitación
   $('aYa').onclick = (e) => { e.preventDefault(); ver('vEntrar'); };
@@ -88,15 +86,22 @@
   $('bVolver').onclick = () => ver('vEntrar');
   $('bOlvide').onclick = async () => {
     $('oErr').textContent = '';
-    const { error } = await App.sb.auth.resetPasswordForEmail($('oEmail').value.trim(), { redirectTo: App.ROOT + 'index.html' });
+    const { error } = await App.sb.auth.resetPasswordForEmail($('oEmail').value.trim(), { redirectTo: App.ROOT });
     if (error) $('oErr').textContent = App.friendly(error); else { App.toast('Revisa tu correo'); ver('vEntrar'); }
   };
   $('bNueva').onclick = async () => {
-    $('nErr').textContent = '';
-    const { error } = await App.sb.auth.updateUser({ password: $('nPass').value });
-    if (error) { $('nErr').textContent = App.friendly(error); return; }
-    history.replaceState(null, '', location.pathname); seguir(await App.refrescar());
+    const b = $('bNueva'), clave = $('nPass').value; $('nErr').textContent = '';
+    if (clave.length < 6) { $('nErr').textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+    const t0 = b.textContent; b.disabled = true; b.textContent = 'Guardando…';
+    const { error } = await App.sb.auth.updateUser({ password: clave });
+    if (error) { $('nErr').textContent = App.friendly(error); b.disabled = false; b.textContent = t0; return; }
+    history.replaceState(null, '', location.pathname);
+    seguir(await App.refrescar());
   };
+  // Enlace de "Olvidé mi contraseña" (o el que manda Supabase): primero se conectan los botones y recién ahí se muestra la clave nueva
+  // (antes se cortaba aquí arriba y "Guardar y entrar" no hacía nada).
+  if (recuperando) { ver('vNueva'); return; }
+  try { const c = await App.refrescar(); if (c && !recuperando) { seguir(c); return; } } catch (e) { /* sin sesión */ }
 })();
 </script>
 <script src="shared/iconos.js"></script>
