@@ -1,1 +1,1 @@
-{"version": "1.51", "bd": "1.12", "funcion": "3.0", "notas": "🛡️ Más seguridad: tras 10 keys erróneas en una hora se bloquea el canje (antes no contaba)"}
+{"version": "1.52", "bd": "1.13", "funcion": "3.0", "notas": "⚙️ Mejoras internas: la base queda lista para módulos que se prenden desde el Centro de Mando"}
