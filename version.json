@@ -1,1 +1,1 @@
-{"version": "1.50", "bd": "1.11", "funcion": "3.0", "notas": "🛡️ Más seguridad: textos y links de la pantalla pasan por un solo filtro (no se cuela código)"}
+{"version": "1.51", "bd": "1.12", "funcion": "3.0", "notas": "🛡️ Más seguridad: tras 10 keys erróneas en una hora se bloquea el canje (antes no contaba)"}
